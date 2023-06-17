@@ -1,16 +1,16 @@
+package client;
+
 import Constants.FormatConstants;
 import dto.HitInputDto;
 import dto.StatOutDto;
 import dto.StatsParamDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import service.StatService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
 @RequiredArgsConstructor
 public class StatClient {
 

@@ -18,8 +18,9 @@ import java.util.List;
 @Slf4j
 public class StatServiceImpl implements StatService {
 
-    private final HitMapper hitMapper;
     private final HitRepository hitRepository;
+    private final HitMapper hitMapper;
+
 
     @Override
     public void addHit(HitInputDto hitInputDto) {

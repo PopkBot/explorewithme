@@ -1,15 +1,62 @@
-version: '3.1'
+version: '3.8'
 services:
-  stats-server:
+  stats-service:
+    build:
+      context: ./stats/stats-service
+      dockerfile: ./Dockerfile
+    container_name: stats-service
     ports:
       - "9090:9090"
+    depends_on:
+      - stats-db
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 10
+        delay: 10s
+    environment:
+      - SPRING_DATASOURCE_PASSWORD=root
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/stats
 
   stats-db:
-    image: postgres:14-alpine
+    image: postgres
+    container_name: stats-db
+    ports:
+      - "9091:5432"
+    volumes:
+      - /var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=stats
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
 
   ewm-service:
     ports:
-      - "8080:8080"
+      - "8081:8081"
+    build: ewm-service
+    container_name: ewm-service
+    depends_on:
+      - ewm-db
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 10
+        delay: 10s
+    environment:
+      - SPRING_DATASOURCE_PASSWORD=root
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ewm
+
 
   ewm-db:
-    image: postgres:14-alpine
+    image: postgres
+    container_name: ewm-db
+    ports:
+      - "8082:5432"
+    volumes:
+      - /var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=ewm
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
