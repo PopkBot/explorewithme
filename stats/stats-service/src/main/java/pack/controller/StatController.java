@@ -4,6 +4,7 @@ import dto.HitInputDto;
 import dto.StatsParamDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import pack.service.StatService;
@@ -24,6 +25,7 @@ public class StatController {
     private final StatService statService;
 
     @PostMapping("/hit")
+    @ResponseStatus(HttpStatus.CREATED)
     public void addHit(@HitCreate @RequestBody HitInputDto hitInputDto) {
         log.info("Hit adding is requested {}", hitInputDto);
         statService.addHit(hitInputDto);

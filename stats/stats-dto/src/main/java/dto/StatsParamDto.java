@@ -12,6 +12,6 @@ public class StatsParamDto {
     private LocalDateTime start;
     private LocalDateTime end;
     private ArrayList<String> uris;
-    private boolean unique;
+    private Boolean unique;
 
 }

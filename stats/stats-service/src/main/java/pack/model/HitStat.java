@@ -20,7 +20,6 @@ public class HitStat {
     private Long id;
     @Column(name = "app", nullable = false)
     private String app;
-    @Id
     @Column(name = "uri", nullable = false)
     private String uri;
     @Column(name = "hits", nullable = false)
