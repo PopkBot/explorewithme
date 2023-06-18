@@ -1,16 +1,18 @@
-package service;
+package pack.service;
 
 import dto.HitInputDto;
-import dto.StatOutDto;
 import dto.StatsParamDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import mapper.HitMapper;
-import model.Hit;
 import org.springframework.stereotype.Service;
-import repository.HitRepository;
+import pack.mapper.HitMapper;
+import pack.model.Hit;
+import pack.repository.HitRepository;
+import projection.StatProjection;
 
+import javax.transaction.Transactional;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -23,13 +25,17 @@ public class StatServiceImpl implements StatService {
 
 
     @Override
+    @Transactional
     public void addHit(HitInputDto hitInputDto) {
         Hit hit = hitRepository.save(hitMapper.convertToHit(hitInputDto));
         log.info("hit {} is added", hit);
     }
 
     @Override
-    public List<StatOutDto> getStats(StatsParamDto statsParamDto) {
+    public List<StatProjection> getStats(StatsParamDto statsParamDto) {
+        if (statsParamDto.getUris() == null) {
+            return new ArrayList<>();
+        }
         Timestamp start = Timestamp.valueOf(statsParamDto.getStart());
         Timestamp end = Timestamp.valueOf(statsParamDto.getEnd());
         StringBuilder urisBuilder = new StringBuilder();
@@ -37,14 +43,14 @@ public class StatServiceImpl implements StatService {
             urisBuilder.append(uri).append(",");
         }
         urisBuilder.deleteCharAt(urisBuilder.length() - 1);
-        List<StatOutDto> statOutDtos;
+        List<StatProjection> statOutDtos;
         if (statsParamDto.isUnique()) {
             statOutDtos = hitRepository.countHitsUnique(start, end, urisBuilder.toString());
-            log.info("Statistic returned {}",statOutDtos);
+            log.info("Statistic returned {}", statOutDtos);
             return statOutDtos;
         }
         statOutDtos = hitRepository.countHits(start, end, urisBuilder.toString());
-        log.info("Statistic returned {}",statOutDtos);
+        log.info("Statistic returned {}", statOutDtos);
         return statOutDtos;
     }
 }
