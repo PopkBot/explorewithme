@@ -1,6 +1,6 @@
 package pack.mapper;
 
-import Constants.FormatConstants;
+import constants.FormatConstants;
 import dto.HitInputDto;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.config.Configuration;
