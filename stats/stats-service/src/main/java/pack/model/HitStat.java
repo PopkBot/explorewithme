@@ -4,10 +4,8 @@ package pack.model;
 import lombok.*;
 
 import javax.persistence.*;
-import java.io.Serializable;
 
 @Entity
-@IdClass(HitStatKey.class)
 @Table(name = "view_stats")
 @Getter
 @Setter
@@ -18,6 +16,8 @@ import java.io.Serializable;
 public class HitStat {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     @Column(name = "app", nullable = false)
     private String app;
     @Id
