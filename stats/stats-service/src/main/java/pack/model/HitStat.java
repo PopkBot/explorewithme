@@ -29,9 +29,4 @@ public class HitStat {
 
 }
 
-class HitStatKey implements Serializable {
-    private String app;
-    private String uri;
-}
-
 
