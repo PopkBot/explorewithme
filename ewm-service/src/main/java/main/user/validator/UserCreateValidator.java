@@ -13,10 +13,10 @@ public class UserCreateValidator implements ConstraintValidator<UserCreate, User
     public boolean isValid(UserInputDto user, ConstraintValidatorContext constraintValidatorContext) {
 
         if (user.getName() == null || user.getName().isBlank()) {
-            throw new ValidationException("name cannot be blank");
+            throw new ValidationException("name cannot be blank "+user.toString());
         }
-        if (user.getEmail() == null || EmailValidator.getInstance().isValid(user.getEmail())) {
-            throw new ValidationException("email is invalid");
+        if (user.getEmail() == null || !EmailValidator.getInstance().isValid(user.getEmail())) {
+            throw new ValidationException("email is invalid "+user.toString());
         }
         return true;
     }

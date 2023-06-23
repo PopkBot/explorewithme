@@ -46,7 +46,7 @@ public class UserServiceImp implements UserService{
             userDtos = userRepository.findAll(page).getContent()
                     .stream().map(userMapper::convertToDto).collect(Collectors.toList());
         }
-        log.info("Page of users is returned {}",userDtos);
+        log.info("Page of users has been returned {}",userDtos);
         return userDtos;
 
     }
@@ -57,6 +57,6 @@ public class UserServiceImp implements UserService{
                 ()-> new ObjectNotFoundException("User not found")
         );
         userRepository.delete(user);
-        log.info("User is deleted {}",user);
+        log.info("User has been deleted {}",user);
     }
 }
