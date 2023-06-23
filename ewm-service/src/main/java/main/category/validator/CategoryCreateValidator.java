@@ -17,7 +17,6 @@ public class CategoryCreateValidator implements ConstraintValidator<CategoryCrea
         if (category.getName() == null || category.getName().isBlank()) {
             throw new ValidationException("name cannot be blank "+category.toString());
         }
-
         return true;
     }
 }

@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,6 +27,7 @@ public class CategoryServiceImp implements CategoryService{
     private final CategoryMapper categoryMapper;
 
     @Override
+    @Transactional
     public CategoryDto createCategory(CategoryInputDto inputDto) {
         if(categoryRepository.findByName(inputDto.getName()).isPresent()){
             throw new ObjectAlreadyExistsException("Category already exists");
@@ -36,6 +38,7 @@ public class CategoryServiceImp implements CategoryService{
     }
 
     @Override
+    @Transactional
     public void deleteCategory(Long id) {
         Category category = categoryRepository.findById(id).orElseThrow(
                 ()-> new ObjectNotFoundException("Category not found")
@@ -45,6 +48,7 @@ public class CategoryServiceImp implements CategoryService{
     }
 
     @Override
+    @Transactional
     public CategoryDto patchCategory(CategoryInputDto inputDto, Long id) {
         Category category = categoryRepository.findById(id).orElseThrow(
                 ()-> new ObjectNotFoundException("Category not found")

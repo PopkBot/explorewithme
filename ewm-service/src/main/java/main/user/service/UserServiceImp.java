@@ -14,6 +14,7 @@ import main.user.repository.UserRepository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,6 +27,7 @@ public class UserServiceImp implements UserService{
     private final UserMapper userMapper;
 
     @Override
+    @Transactional
     public UserDto createUser(UserInputDto userInputDto) {
         if(userRepository.findByEmail(userInputDto.getEmail()).isPresent()){
             throw new ObjectAlreadyExistsException("Email is already taken");
@@ -52,6 +54,7 @@ public class UserServiceImp implements UserService{
     }
 
     @Override
+    @Transactional
     public void deleteUser(Long id) {
         User user = userRepository.findById(id).orElseThrow(
                 ()-> new ObjectNotFoundException("User not found")
