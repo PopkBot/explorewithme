@@ -1,9 +1,11 @@
-package main.user.mapper;
+package main.request.mapper;
 
-import main.user.dto.UserDto;
-import main.user.dto.UserInputDto;
-import main.user.dto.UserShortDto;
-import main.user.model.User;
+import constants.FormatConstants;
+import main.event.dto.EventDto;
+import main.event.dto.EventInputDto;
+import main.event.model.Event;
+import main.request.dto.RequestDto;
+import main.request.model.Request;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.config.Configuration;
 import org.modelmapper.convention.MatchingStrategies;
@@ -12,12 +14,15 @@ import org.modelmapper.convention.NamingConventions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+
 @Component
-public class UserMapper {
+public class RequestMapper {
     private final ModelMapper modelMapper;
 
     @Autowired
-    public UserMapper() {
+    public RequestMapper() {
         this.modelMapper = new ModelMapper();
         Configuration configuration = modelMapper.getConfiguration();
         configuration.setFieldAccessLevel(Configuration.AccessLevel.PUBLIC);
@@ -28,16 +33,7 @@ public class UserMapper {
         configuration.setMatchingStrategy(MatchingStrategies.STRICT);
     }
 
-    public User convertToUser(UserInputDto userInputDto) {
-        return modelMapper.map(userInputDto, User.class);
+    public RequestDto convertToDto(Request request){
+        return modelMapper.map(request, RequestDto.class);
     }
-
-    public UserDto convertToDto(User user){
-        return modelMapper.map(user,UserDto.class);
-    }
-
-    public UserShortDto convertToShortDto(User user){
-        return modelMapper.map(user,UserShortDto.class);
-    }
-
 }

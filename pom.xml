@@ -27,6 +27,9 @@
 		<org.modelmapper.verison>2.3.2</org.modelmapper.verison>
 		<commons-validator.verison>1.7</commons-validator.verison>
 		<org.apache.httpcomponents.verison>4.3.4</org.apache.httpcomponents.verison>
+
+		<com.querydsl.verison>5.0.0</com.querydsl.verison>
+		<com.vladmihalcea.verison>2.2.2</com.vladmihalcea.verison>
 	</properties>
 
 
@@ -50,6 +53,24 @@
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient</artifactId>
 				<version>${org.apache.httpcomponents.verison}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.querydsl</groupId>
+				<artifactId>querydsl-jpa</artifactId>
+				<version>${com.querydsl.verison}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.vladmihalcea</groupId>
+				<artifactId>hibernate-types-52</artifactId>
+				<version>${com.vladmihalcea.verison}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.querydsl</groupId>
+				<artifactId>querydsl-apt</artifactId>
+				<version>${com.querydsl.verison}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

@@ -1,5 +1,5 @@
 package main.event;
 
 public enum State {
-    PUBLISHED, CONFIRMED
+    PUBLISHED, CONFIRMED, Pending, WAITING, PUBLISH_EVENT
 }
