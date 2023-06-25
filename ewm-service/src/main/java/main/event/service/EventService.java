@@ -15,4 +15,8 @@ public interface EventService {
     List<EventDto> getEvents(GetEventsParamsDto paramsDto);
 
     EventDto updateEvent(Long eventId, EventUpdateDto eventUpdateDto);
+
+    EventDto getEventById(Long userId, Long eventId);
+
+    List<EventDto> getEventsPublic(GetEventsParamsDto paramsDto);
 }

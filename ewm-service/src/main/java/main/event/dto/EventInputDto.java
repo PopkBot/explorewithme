@@ -3,7 +3,6 @@ package main.event.dto;
 import lombok.Data;
 import main.event.model.Location;
 
-import java.time.LocalDateTime;
 
 @Data
 public class EventInputDto {

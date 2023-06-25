@@ -8,6 +8,7 @@ import main.category.service.CategoryService;
 import main.category.validator.CategoryCreate;
 import main.category.validator.CategoryUpdate;
 import main.event.dto.EventDto;
+import main.event.dto.EventUpdateDto;
 import main.event.dto.GetEventsParamsDto;
 import main.event.service.EventService;
 import main.user.dto.GetUserListParamsDto;
@@ -19,7 +20,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.constraints.Null;
 import java.util.List;
 
 @RestController
@@ -85,9 +85,9 @@ public class AdminUser {
 
     @GetMapping("/events")
     @ResponseStatus(HttpStatus.OK)
-    public List<EventDto> getEvents(@RequestParam(defaultValue = "[]") List<Long> users,
-                                    @RequestParam(defaultValue = "[]") List<String> states,
-                                    @RequestParam(defaultValue = "[]") List<Long> categories,
+    public List<EventDto> getEvents(@RequestParam(required = false) List<Long> users,
+                                    @RequestParam(required = false) List<String> states,
+                                    @RequestParam(required = false) List<Long> categories,
                                     @RequestParam(required = false) String rangeStart,
                                     @RequestParam(required = false) String rangeEnd,
                                     @RequestParam(defaultValue = "0") Integer from,
@@ -103,5 +103,14 @@ public class AdminUser {
                 .build();
         log.info("Request for events {}",paramsDto.toString());
         return eventService.getEvents(paramsDto);
+    }
+
+    @PatchMapping("/events/{eventId}")
+    @ResponseStatus(HttpStatus.OK)
+    public EventDto updateEvent(@PathVariable Long eventId,
+                                @RequestBody EventUpdateDto eventUpdateDto){
+        eventUpdateDto.setAccess(Access.ADMIN);
+        log.info("Request from admin for event {} update {}",eventId,eventUpdateDto);
+        return eventService.updateEvent(eventId,eventUpdateDto);
     }
 }
