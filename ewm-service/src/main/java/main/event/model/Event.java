@@ -33,7 +33,7 @@ public class Event {
     @Column(name = "confirmed_requests",nullable = false)
     private Integer confirmedRequests;
     @Column(name = "created",nullable = false)
-    private ZonedDateTime created;
+    private ZonedDateTime createdOn;
     @Column(name = "description",nullable = false)
     private String description;
     @Column(name = "event_date",nullable = false)
@@ -46,7 +46,7 @@ public class Event {
     @Column(name = "participant_limit",nullable = false)
     private Integer participantLimit;
     @Column(name = "published")
-    private ZonedDateTime published;
+    private ZonedDateTime publishedOn;
     @Column(name = "request_moderation",nullable = false)
     private Boolean requestModeration;
     @Column(name = "state",nullable = false)

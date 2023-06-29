@@ -7,6 +7,8 @@ import main.event.dto.EventInputDto;
 import main.event.dto.EventUpdateDto;
 import main.event.dto.GetEventsParamsDto;
 import main.event.service.EventService;
+import main.event.validator.EventCreate;
+import main.event.validator.EventUpdate;
 import main.request.dto.RequestDto;
 import main.request.dto.StatusSettingDto;
 import main.request.dto.StatusSettingInputDto;
@@ -29,7 +31,7 @@ public class PrivateUser {
 
     @PostMapping("/{userId}/events")
     @ResponseStatus(HttpStatus.CREATED)
-    public EventDto createEvent(@RequestBody EventInputDto eventInputDto,
+    public EventDto createEvent(@EventCreate @RequestBody EventInputDto eventInputDto,
                                 @PathVariable Long userId){
         log.info("Request for event adding by user {} {}",userId,eventInputDto);
         return eventService.createEvent(eventInputDto,userId);
@@ -66,6 +68,7 @@ public class PrivateUser {
                 .from(from)
                 .size(size)
                 .build();
+        paramsDto.validate();
         log.info("Request for user`s {} events {}",userId,paramsDto);
 
         return eventService.getEvents(paramsDto);
@@ -82,8 +85,9 @@ public class PrivateUser {
     @ResponseStatus(HttpStatus.OK)
     public EventDto updateEvent(@PathVariable Long userId,
                                 @PathVariable Long eventId,
-                                @RequestBody EventUpdateDto eventUpdateDto){
+                                @EventUpdate @RequestBody EventUpdateDto eventUpdateDto){
         eventUpdateDto.setAccess(Access.PRIVATE);
+        eventUpdateDto.setUserId(userId);
         log.info("Request from user {} for event {} update {}", userId, eventId,eventUpdateDto);
         return eventService.updateEvent(eventId,eventUpdateDto);
     }

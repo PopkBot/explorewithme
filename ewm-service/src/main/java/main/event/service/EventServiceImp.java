@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import main.CustomPageRequest;
 import main.category.model.Category;
 import main.category.repository.CategoryRepository;
-import main.event.QEvent;
+import main.event.model.QEvent;
 import main.event.State;
 import main.event.dto.EventDto;
 import main.event.dto.EventInputDto;
@@ -24,9 +24,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import javax.transaction.Transactional;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -37,6 +37,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Validated
 public class EventServiceImp implements EventService{
 
     private final EventRepository eventRepository;
@@ -90,7 +91,7 @@ public class EventServiceImp implements EventService{
                     .atZone(ZoneId.systemDefault());
             ZonedDateTime end = LocalDateTime.parse(paramsDto.getRangeEnd(),FormatConstants.DATE_TIME_FORMATTER)
                     .atZone(ZoneId.systemDefault());
-            query = query.and(QEvent.event.created.between(start,end));
+            query = query.and(QEvent.event.eventDate.between(start,end));
         }
 
         Pageable page = new CustomPageRequest(paramsDto.getFrom(),paramsDto.getSize());
@@ -136,8 +137,20 @@ public class EventServiceImp implements EventService{
     }
 
     @Override
+    public EventDto getEventByIdPublic(Long eventId) {
+        Event event = eventRepository.findById(eventId).orElseThrow(
+                ()-> new ObjectNotFoundException("Event not found")
+        );
+        if(!event.getState().equals(State.PUBLISHED)){
+            throw new ObjectNotFoundException("Event not found");
+        }
+        log.info("Event has been returned {}",event);
+        return eventMapper.convertToDto(event);
+    }
+
+    @Override
     public List<EventDto> getEventsPublic(GetEventsParamsDto paramsDto) {
-        BooleanExpression query = QEvent.event.state.eq(State.PUBLISHED);
+          BooleanExpression query = QEvent.event.state.eq(State.PUBLISHED);
         if(paramsDto.getSearchText()!=null){
             query = query.and(QEvent.event.annotation.containsIgnoreCase(paramsDto.getSearchText())
                     .or(QEvent.event.description.containsIgnoreCase(paramsDto.getSearchText())));
@@ -153,10 +166,10 @@ public class EventServiceImp implements EventService{
                     .atZone(ZoneId.systemDefault());
             ZonedDateTime end = LocalDateTime.parse(paramsDto.getRangeEnd(),FormatConstants.DATE_TIME_FORMATTER)
                     .atZone(ZoneId.systemDefault());
-            query = query.and(QEvent.event.created.between(start,end));
+            query = query.and(QEvent.event.eventDate.between(start,end));
         }else{
             ZonedDateTime now = ZonedDateTime.now(ZoneId.systemDefault());
-            query = query.and(QEvent.event.created.after(now));
+            query = query.and(QEvent.event.eventDate.after(now));
         }
         if(paramsDto.getOnlyAvailable()!=null && paramsDto.getOnlyAvailable()){
             query = query.and(QEvent.event.participantLimit.gt(QEvent.event.confirmedRequests));
@@ -165,7 +178,7 @@ public class EventServiceImp implements EventService{
         Sort sort;
         switch (paramsDto.getSort()){
             case EVENT_DATE:
-                sort = Sort.by(Sort.Direction.ASC,"created");
+                sort = Sort.by(Sort.Direction.ASC,"createdOn");
                 break;
             default:
                 sort = Sort.by(Sort.Direction.ASC,"views");
@@ -182,11 +195,13 @@ public class EventServiceImp implements EventService{
 
     private void updateEventAdmin(Event event, EventUpdateDto eventUpdateDto){
         long hoursBefore = 1L;
-        if(event.getState().equals(State.PUBLISHED) && event.getPublished().isBefore(ZonedDateTime.now(ZoneId.systemDefault()).plusHours(hoursBefore))){
+        if(event.getState().equals(State.PUBLISHED) && event.getPublishedOn().isBefore(ZonedDateTime.now(ZoneId.systemDefault()).plusHours(hoursBefore))){
             throw new ValidationException("Cannot change event less then "+hoursBefore+" hour before event publishing");
         }
         updateEventParams(event, eventUpdateDto);
-        updateEventStateAdmin(event, eventUpdateDto.getStateAction());
+        if(eventUpdateDto.getStateAction()!=null) {
+            updateEventStateAdmin(event, eventUpdateDto.getStateAction());
+        }
     }
 
     private void updateEventPrivate(Event event, EventUpdateDto eventUpdateDto){
@@ -197,14 +212,17 @@ public class EventServiceImp implements EventService{
         if(!event.getInitiator().getId().equals(eventUpdateDto.getUserId())){
             throw new ValidationException("User is not the initiator of the event");
         }
-        if(event.getPublished().isBefore(ZonedDateTime.now(ZoneId.systemDefault()).plusHours(hoursBefore))){
+        if(event.getState().equals(State.PUBLISHED) &&
+                event.getPublishedOn().isBefore(ZonedDateTime.now(ZoneId.systemDefault()).plusHours(hoursBefore))){
             throw new ValidationException("Cannot change event less then "+hoursBefore+" hour before event publishing");
         }
-        if(!(event.getState().equals(State.WAITING) || event.getState().equals(State.CANCELED))){
+        if(!(event.getState().equals(State.PENDING) || event.getState().equals(State.CANCELED))){
             throw new ValidationException("Unable to patch event");
         }
         updateEventParams(event, eventUpdateDto);
-        updateEventStatePrivate(event, eventUpdateDto.getStateAction());
+        if(eventUpdateDto.getStateAction()!=null) {
+            updateEventStatePrivate(event, eventUpdateDto.getStateAction());
+        }
     }
 
     private void updateEventParams(Event event, EventUpdateDto eventUpdateDto){
@@ -221,7 +239,8 @@ public class EventServiceImp implements EventService{
             event.setDescription(eventUpdateDto.getDescription());
         }
         if(eventUpdateDto.getEventDate()!=null){
-            ZonedDateTime date = ZonedDateTime.parse(eventUpdateDto.getEventDate(),FormatConstants.DATE_TIME_FORMATTER);
+            ZonedDateTime date = LocalDateTime.parse(eventUpdateDto.getEventDate(),FormatConstants.DATE_TIME_FORMATTER)
+                    .atZone(ZoneId.systemDefault());
             event.setEventDate(date);
         }
         if(eventUpdateDto.getLocation()!=null){
@@ -244,8 +263,9 @@ public class EventServiceImp implements EventService{
     private void updateEventStateAdmin(Event event, State state){
         switch (state){
             case PUBLISH_EVENT:
-                if(event.getState().equals(State.WAITING)){
+                if(event.getState().equals(State.PENDING)){
                 event.setState(State.PUBLISHED);
+                event.setPublishedOn(ZonedDateTime.now(ZoneId.systemDefault()));
                 }
                 break;
             case CANCEL_REVIEW:
@@ -265,9 +285,9 @@ public class EventServiceImp implements EventService{
     private Event makeEvent(EventInputDto eventInputDto, User initiator, Category category){
         Event event = eventMapper.convertToCategory(eventInputDto);
         event.setConfirmedRequests(0);
-        event.setCreated(ZonedDateTime.now(ZoneId.systemDefault()));
+        event.setCreatedOn(ZonedDateTime.now(ZoneId.systemDefault()));
         event.setInitiator(initiator);
-        event.setState(State.WAITING);
+        event.setState(State.PENDING);
         event.setViews(0);
         event.setCategory(category);
         return event;

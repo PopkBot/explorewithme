@@ -20,7 +20,7 @@ public class Request {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "event",nullable = false)
+    @Column(name = "event_id",nullable = false)
     private Long event;
     @Column(name = "requester_id",nullable = false)
     private Long requester;
@@ -28,6 +28,6 @@ public class Request {
     private ZonedDateTime created;
     @Column(name = "status",nullable = false)
     @Enumerated(EnumType.STRING)
-    private State state;
+    private State status;
 
 }

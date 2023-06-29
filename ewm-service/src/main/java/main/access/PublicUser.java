@@ -9,6 +9,7 @@ import main.event.dto.EventDto;
 import main.event.dto.GetEventsParamsDto;
 import main.event.service.EventService;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.List;
 @RestController
 @Slf4j
 @RequiredArgsConstructor
+@Validated
 public class PublicUser {
 
     private final CategoryService categoryService;
@@ -58,9 +60,17 @@ public class PublicUser {
                 .size(size)
                 .from(from)
                 .build();
+        dto.validate();
         log.info("Request for events {}",dto);
         return eventService.getEventsPublic(dto);
 
+    }
+
+    @GetMapping("/events/{eventId}")
+    @ResponseStatus(HttpStatus.OK)
+    public EventDto getEventById(@PathVariable Long eventId){
+        log.info("Public request for event {}",eventId);
+        return eventService.getEventByIdPublic(eventId);
     }
 
 }

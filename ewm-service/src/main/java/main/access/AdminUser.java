@@ -11,6 +11,7 @@ import main.event.dto.EventDto;
 import main.event.dto.EventUpdateDto;
 import main.event.dto.GetEventsParamsDto;
 import main.event.service.EventService;
+import main.event.validator.EventUpdate;
 import main.user.dto.GetUserListParamsDto;
 import main.user.dto.UserDto;
 import main.user.dto.UserInputDto;
@@ -101,6 +102,7 @@ public class AdminUser {
                 .from(from)
                 .size(size)
                 .build();
+        paramsDto.validate();
         log.info("Request for events {}",paramsDto.toString());
         return eventService.getEvents(paramsDto);
     }
@@ -108,7 +110,7 @@ public class AdminUser {
     @PatchMapping("/events/{eventId}")
     @ResponseStatus(HttpStatus.OK)
     public EventDto updateEvent(@PathVariable Long eventId,
-                                @RequestBody EventUpdateDto eventUpdateDto){
+                                @EventUpdate @RequestBody EventUpdateDto eventUpdateDto){
         eventUpdateDto.setAccess(Access.ADMIN);
         log.info("Request from admin for event {} update {}",eventId,eventUpdateDto);
         return eventService.updateEvent(eventId,eventUpdateDto);

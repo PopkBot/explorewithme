@@ -21,6 +21,7 @@ import javax.transaction.Transactional;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -47,7 +48,7 @@ public class RequestServiceImp implements RequestService{
         if(requestOpt.isPresent()){
             throw new ObjectAlreadyExistsException("Request already exists");
         }
-        if(requestOpt.get().getRequester()==userId){
+        if(Objects.equals(event.getInitiator().getId(), userId)){
             throw new ValidationException("Initiator cannot request for participation in his own event");
         }
         if(!event.getState().equals(State.PUBLISHED)){
@@ -59,13 +60,13 @@ public class RequestServiceImp implements RequestService{
                 .created(ZonedDateTime.now(ZoneId.systemDefault()))
                 .build();
         if(event.getParticipantLimit()==0 || !event.getRequestModeration()){
-            request.setState(State.CONFIRMED);
+            request.setStatus(State.CONFIRMED);
             event.setConfirmedRequests(event.getConfirmedRequests()+1);
             eventRepository.save(event);
         }else if(event.getParticipantLimit()<=event.getConfirmedRequests()){
             throw new ValidationException("Event`s participant limit has been reached");
         }else{
-            request.setState(State.PENDING);
+            request.setStatus(State.PENDING);
         }
         request = requestRepository.save(request);
         log.info("Request has been created {}",request);
@@ -98,11 +99,14 @@ public class RequestServiceImp implements RequestService{
         Event event = eventRepository.findById(request.getEvent()).orElseThrow(
                 ()-> new ObjectNotFoundException("Event to found")
         );
-        if(request.getState().equals(State.CONFIRMED)){
+        if(request.getStatus().equals(State.CONFIRMED)){
             event.setConfirmedRequests(event.getConfirmedRequests()-1);
             eventRepository.save(event);
         }
-        requestRepository.delete(request);
+        event.setConfirmedRequests(event.getConfirmedRequests()-1);
+        eventRepository.save(event);
+        request.setStatus(State.CANCELED);
+        request = requestRepository.save(request);
         log.info("Request has been deleted {}",request);
         return requestMapper.convertToDto(request);
     }
@@ -125,6 +129,7 @@ public class RequestServiceImp implements RequestService{
     }
 
     @Override
+    @Transactional
     public StatusSettingDto setStatusOfRequests(Long userId, Long eventId, StatusSettingInputDto dto) {
         userRepository.findById(userId).orElseThrow(
                 ()-> new ObjectNotFoundException("User not found")
@@ -136,9 +141,9 @@ public class RequestServiceImp implements RequestService{
             throw new ValidationException("User is not the initiator of the event");
         }
         if(event.getParticipantLimit().equals(0) || !event.getRequestModeration()){
-            List<RequestDto> confirmed = requestRepository.findAllByEventAndState(eventId,State.CONFIRMED.toString())
+            List<RequestDto> confirmed = requestRepository.findAllByEventAndStatus(eventId,State.CONFIRMED)
                     .stream().map(requestMapper::convertToDto).collect(Collectors.toList());
-            List<RequestDto> rejected = requestRepository.findAllByEventAndState(eventId,State.REJECTED.toString())
+            List<RequestDto> rejected = requestRepository.findAllByEventAndStatus(eventId,State.REJECTED)
                     .stream().map(requestMapper::convertToDto).collect(Collectors.toList());
 
             StatusSettingDto statusSettingDto = StatusSettingDto.builder()
@@ -153,16 +158,15 @@ public class RequestServiceImp implements RequestService{
             dto.getStatus().equals(State.CONFIRMED)){
             throw new ValidationException("Limit of participants for this event has been reached");
         }
-
-        requestRepository.setStatusOfRequests(dto.getStatus().toString(), dto.getRequestIds(),State.WAITING.toString());
-        List<RequestDto> confirmed = requestRepository.findAllByEventAndState(eventId,State.CONFIRMED.toString())
+        requestRepository.setStatusOfRequests(dto.getStatus().toString(), dto.getRequestIds(),State.PENDING.toString());
+        List<RequestDto> confirmed = requestRepository.findAllByEventAndStatus(eventId,State.CONFIRMED)
                 .stream().map(requestMapper::convertToDto).collect(Collectors.toList());
         event.setConfirmedRequests(confirmed.size());
         event = eventRepository.save(event);
         if(event.getConfirmedRequests().equals(event.getParticipantLimit())){
             requestRepository.setStatusOfRequests(State.REJECTED.toString(),State.WAITING.toString());
         }
-        List<RequestDto> rejected = requestRepository.findAllByEventAndState(eventId,State.REJECTED.toString())
+        List<RequestDto> rejected = requestRepository.findAllByEventAndStatus(eventId,State.REJECTED)
                 .stream().map(requestMapper::convertToDto).collect(Collectors.toList());
         StatusSettingDto statusSettingDto = StatusSettingDto.builder()
                 .confirmedRequests(confirmed)

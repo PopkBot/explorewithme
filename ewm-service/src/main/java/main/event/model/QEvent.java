@@ -1,12 +1,11 @@
-package main.event;
+package main.event.model;
 
 import com.querydsl.core.annotations.Generated;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.PathMetadata;
 import com.querydsl.core.types.dsl.*;
-import main.event.model.Event;
+import main.event.State;
 
-import java.sql.Timestamp;
 import java.time.ZonedDateTime;
 
 import static com.querydsl.core.types.PathMetadataFactory.forVariable;
@@ -22,7 +21,9 @@ public class QEvent extends EntityPathBase<Event> {
 
     public final NumberPath<Long> category = createNumber("category.id", Long.class);
 
-    public final TimePath<ZonedDateTime> created = createTime("created", ZonedDateTime.class);
+    public final TimePath<ZonedDateTime> createdOn = createTime("createdOn", ZonedDateTime.class);
+
+    public final TimePath<ZonedDateTime> eventDate = createTime("eventDate", ZonedDateTime.class);
 
     public final StringPath annotation = createString("annotation");
 

@@ -11,9 +11,9 @@ public class EventInputDto {
     private String description;
     private String eventDate;
     private Location location;
-    private Boolean paid;
-    private Integer participantLimit;
-    private Boolean requestModeration;
+    private Boolean paid = false;
+    private Integer participantLimit = 0;
+    private Boolean requestModeration = true;
     private String title;
 
 }
