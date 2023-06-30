@@ -2,6 +2,7 @@ package main.request.repository;
 
 import main.event.State;
 import main.request.model.Request;
+import main.request.projection.RequestCountProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -28,4 +29,8 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
     @Query(nativeQuery = true, value = "UPDATE requests SET status = ?1 "+
             "WHERE status = ?2")
     void setStatusOfRequests(String newStatus, String checkStatus);
+
+    @Query(nativeQuery = true, value = "SELECT COUNT(id) AS countId FROM requests WHERE status = ?1 AND "+
+            "event_id = ?2 AND id IN (?3)")
+    RequestCountProjection countStatusRequests(String state, Long eventId , List<Long> requestersIds);
 }

@@ -14,8 +14,8 @@ public class CategoryCreateValidator implements ConstraintValidator<CategoryCrea
     @Override
     public boolean isValid(CategoryInputDto category, ConstraintValidatorContext constraintValidatorContext) {
 
-        if (category.getName() == null || category.getName().isBlank()) {
-            throw new ValidationException("name cannot be blank "+category.toString());
+        if (category.getName() == null || category.getName().length()>50) {
+            throw new ValidationException("name cannot be longer then 50 characters");
         }
         return true;
     }

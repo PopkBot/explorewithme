@@ -7,15 +7,14 @@ import lombok.extern.slf4j.Slf4j;
 import main.CustomPageRequest;
 import main.category.model.Category;
 import main.category.repository.CategoryRepository;
+import main.event.dto.*;
 import main.event.model.QEvent;
 import main.event.State;
-import main.event.dto.EventDto;
-import main.event.dto.EventInputDto;
-import main.event.dto.EventUpdateDto;
-import main.event.dto.GetEventsParamsDto;
 import main.event.mapper.EventMapper;
 import main.event.model.Event;
 import main.event.repository.EventRepository;
+import main.exceptions.ConflictException;
+import main.exceptions.ObjectAlreadyExistsException;
 import main.exceptions.ObjectNotFoundException;
 import main.exceptions.ValidationException;
 import main.user.model.User;
@@ -103,6 +102,7 @@ public class EventServiceImp implements EventService{
     }
 
     @Override
+    @Transactional
     public EventDto updateEvent(Long eventId, EventUpdateDto eventUpdateDto) {
 
         Event event = eventRepository.findById(eventId).orElseThrow(
@@ -149,7 +149,7 @@ public class EventServiceImp implements EventService{
     }
 
     @Override
-    public List<EventDto> getEventsPublic(GetEventsParamsDto paramsDto) {
+    public List<EventPublicDto> getEventsPublic(GetEventsParamsDto paramsDto) {
           BooleanExpression query = QEvent.event.state.eq(State.PUBLISHED);
         if(paramsDto.getSearchText()!=null){
             query = query.and(QEvent.event.annotation.containsIgnoreCase(paramsDto.getSearchText())
@@ -187,16 +187,22 @@ public class EventServiceImp implements EventService{
 
         Pageable page = new CustomPageRequest(paramsDto.getFrom(),paramsDto.getSize(),sort);
         Page<Event> eventPage = eventRepository.findAll(query,page);
-        List<EventDto> eventDtos = eventPage.getContent().stream()
-                .map(eventMapper::convertToDto).collect(Collectors.toList());
+        List<EventPublicDto> eventDtos = eventPage.getContent().stream()
+                .map(eventMapper::convertToPublicDto).collect(Collectors.toList());
         log.info("Page of events has been returned {}",eventDtos);
         return eventDtos;
     }
 
     private void updateEventAdmin(Event event, EventUpdateDto eventUpdateDto){
         long hoursBefore = 1L;
-        if(event.getState().equals(State.PUBLISHED) && event.getPublishedOn().isBefore(ZonedDateTime.now(ZoneId.systemDefault()).plusHours(hoursBefore))){
-            throw new ValidationException("Cannot change event less then "+hoursBefore+" hour before event publishing");
+        if(event.getState().equals(State.PUBLISHED)){
+            throw new ConflictException("Cannot change published event");
+        }
+        if(event.getState().equals(State.CANCELED)){
+            throw new ConflictException("Cannot change canceled event");
+        }
+        if(event.getEventDate().isBefore(ZonedDateTime.now(ZoneId.systemDefault()).plusHours(hoursBefore))) {
+            throw new ValidationException("Cannot change event less then " + hoursBefore + " hour before event date");
         }
         updateEventParams(event, eventUpdateDto);
         if(eventUpdateDto.getStateAction()!=null) {
@@ -212,9 +218,14 @@ public class EventServiceImp implements EventService{
         if(!event.getInitiator().getId().equals(eventUpdateDto.getUserId())){
             throw new ValidationException("User is not the initiator of the event");
         }
-        if(event.getState().equals(State.PUBLISHED) &&
-                event.getPublishedOn().isBefore(ZonedDateTime.now(ZoneId.systemDefault()).plusHours(hoursBefore))){
-            throw new ValidationException("Cannot change event less then "+hoursBefore+" hour before event publishing");
+        if(event.getState().equals(State.PUBLISHED)){
+            throw new ConflictException("Cannot change published event");
+        }
+        if(event.getState().equals(State.CANCELED)){
+            throw new ConflictException("Cannot change canceled event");
+        }
+        if(event.getEventDate().isBefore(ZonedDateTime.now(ZoneId.systemDefault()).plusHours(hoursBefore))){
+            throw new ValidationException("Cannot change event less then "+hoursBefore+" hour before event date");
         }
         if(!(event.getState().equals(State.PENDING) || event.getState().equals(State.CANCELED))){
             throw new ValidationException("Unable to patch event");
@@ -268,7 +279,7 @@ public class EventServiceImp implements EventService{
                 event.setPublishedOn(ZonedDateTime.now(ZoneId.systemDefault()));
                 }
                 break;
-            case CANCEL_REVIEW:
+            case REJECT_EVENT:
                 event.setState(State.CANCELED);
                 break;
         }

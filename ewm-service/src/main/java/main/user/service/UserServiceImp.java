@@ -41,7 +41,7 @@ public class UserServiceImp implements UserService{
     public List<UserDto> getUsers(GetUserListParamsDto paramsDto) {
         Pageable page = new CustomPageRequest(paramsDto.getFrom(),paramsDto.getSize());
         List<UserDto> userDtos;
-        if(paramsDto.getIds().size()!=0){
+        if(paramsDto.getIds()!= null && paramsDto.getIds().size()!=0){
             userDtos = userRepository.findAllByIdIn(paramsDto.getIds(),page).getContent()
                     .stream().map(userMapper::convertToDto).collect(Collectors.toList());
         } else {

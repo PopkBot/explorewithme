@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import main.event.State;
 import main.event.model.Event;
 import main.event.repository.EventRepository;
+import main.exceptions.ConflictException;
 import main.exceptions.ObjectAlreadyExistsException;
 import main.exceptions.ObjectNotFoundException;
 import main.exceptions.ValidationException;
@@ -49,23 +50,26 @@ public class RequestServiceImp implements RequestService{
             throw new ObjectAlreadyExistsException("Request already exists");
         }
         if(Objects.equals(event.getInitiator().getId(), userId)){
-            throw new ValidationException("Initiator cannot request for participation in his own event");
+            throw new ConflictException("Initiator cannot request for participation in his own event");
         }
         if(!event.getState().equals(State.PUBLISHED)){
-            throw new ValidationException("Event has not been published yet");
+            throw new ConflictException("Event has not been published yet");
         }
         Request request = Request.builder()
                 .requester(userId)
                 .event(eventId)
                 .created(ZonedDateTime.now(ZoneId.systemDefault()))
                 .build();
-        if(event.getParticipantLimit()==0 || !event.getRequestModeration()){
+
+
+        if(!event.getRequestModeration() || event.getParticipantLimit() == 0){
             request.setStatus(State.CONFIRMED);
             event.setConfirmedRequests(event.getConfirmedRequests()+1);
             eventRepository.save(event);
         }else if(event.getParticipantLimit()<=event.getConfirmedRequests()){
-            throw new ValidationException("Event`s participant limit has been reached");
-        }else{
+            throw new ConflictException("Event`s participant limit has been reached");
+        }
+        else{
             request.setStatus(State.PENDING);
         }
         request = requestRepository.save(request);
@@ -154,9 +158,14 @@ public class RequestServiceImp implements RequestService{
             return statusSettingDto;
         }
 
+        if(dto.getStatus().equals(State.REJECTED) &&
+                requestRepository.countStatusRequests(State.CONFIRMED.toString(),eventId,dto.getRequestIds()).getCountId()>0){
+            throw new ConflictException("Cannot reject confirmed request");
+        }
+
         if(event.getParticipantLimit()<event.getConfirmedRequests()+dto.getRequestIds().size() &&
             dto.getStatus().equals(State.CONFIRMED)){
-            throw new ValidationException("Limit of participants for this event has been reached");
+            throw new ConflictException("Limit of participants for this event has been reached");
         }
         requestRepository.setStatusOfRequests(dto.getStatus().toString(), dto.getRequestIds(),State.PENDING.toString());
         List<RequestDto> confirmed = requestRepository.findAllByEventAndStatus(eventId,State.CONFIRMED)
@@ -164,7 +173,7 @@ public class RequestServiceImp implements RequestService{
         event.setConfirmedRequests(confirmed.size());
         event = eventRepository.save(event);
         if(event.getConfirmedRequests().equals(event.getParticipantLimit())){
-            requestRepository.setStatusOfRequests(State.REJECTED.toString(),State.WAITING.toString());
+            requestRepository.setStatusOfRequests(State.REJECTED.toString(),State.PENDING.toString());
         }
         List<RequestDto> rejected = requestRepository.findAllByEventAndStatus(eventId,State.REJECTED)
                 .stream().map(requestMapper::convertToDto).collect(Collectors.toList());

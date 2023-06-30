@@ -3,13 +3,16 @@ package main.event.model;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.*;
 import main.category.model.Category;
+import main.compilation.model.Compilation;
 import main.event.State;
 import main.user.model.User;
+import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.*;
 import java.time.ZonedDateTime;
+import java.util.Set;
 
 @Entity
 @Table(name = "events")
@@ -59,5 +62,9 @@ public class Event {
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb",name = "location",nullable = false)
     private Location location;
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @ManyToMany(mappedBy = "events",fetch = FetchType.LAZY)
+    Set<Compilation> compilations;
 
 }

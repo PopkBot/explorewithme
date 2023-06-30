@@ -8,9 +8,10 @@ import main.category.dto.CategoryInputDto;
 import main.category.mapper.CategoryMapper;
 import main.category.model.Category;
 import main.category.repository.CategoryRepository;
+import main.event.repository.EventRepository;
+import main.exceptions.ConflictException;
 import main.exceptions.ObjectAlreadyExistsException;
 import main.exceptions.ObjectNotFoundException;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,7 @@ public class CategoryServiceImp implements CategoryService{
 
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
+    private final EventRepository eventRepository;
 
     @Override
     @Transactional
@@ -43,6 +45,9 @@ public class CategoryServiceImp implements CategoryService{
         Category category = categoryRepository.findById(id).orElseThrow(
                 ()-> new ObjectNotFoundException("Category not found")
         );
+        if(eventRepository.findCategoryUsages(id).getCountId()>0){
+            throw new ConflictException("Cannot delete category with related events");
+        }
         categoryRepository.delete(category);
         log.info("Category has been deleted");
     }
@@ -53,6 +58,9 @@ public class CategoryServiceImp implements CategoryService{
         Category category = categoryRepository.findById(id).orElseThrow(
                 ()-> new ObjectNotFoundException("Category not found")
         );
+        if(categoryRepository.findByName(inputDto.getName()).isPresent()){
+            throw new ObjectAlreadyExistsException("Category already exists");
+        }
         category.setName(inputDto.getName());
         category = categoryRepository.save(category);
         log.info("Category has been updated {}",category);

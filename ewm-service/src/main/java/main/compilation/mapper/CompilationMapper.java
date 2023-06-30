@@ -1,13 +1,11 @@
-package main.event.mapper;
+package main.compilation.mapper;
 
-import constants.FormatConstants;
 import main.category.dto.CategoryDto;
 import main.category.dto.CategoryInputDto;
 import main.category.model.Category;
-import main.event.dto.EventDto;
-import main.event.dto.EventInputDto;
-import main.event.dto.EventPublicDto;
-import main.event.model.Event;
+import main.compilation.dto.CompilationDto;
+import main.compilation.dto.CompilationInputDto;
+import main.compilation.model.Compilation;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.config.Configuration;
 import org.modelmapper.convention.MatchingStrategies;
@@ -16,16 +14,12 @@ import org.modelmapper.convention.NamingConventions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-
 @Component
-public class EventMapper {
+public class CompilationMapper {
     private final ModelMapper modelMapper;
 
     @Autowired
-    public EventMapper() {
+    public CompilationMapper() {
         this.modelMapper = new ModelMapper();
         Configuration configuration = modelMapper.getConfiguration();
         configuration.setFieldAccessLevel(Configuration.AccessLevel.PUBLIC);
@@ -36,18 +30,11 @@ public class EventMapper {
         configuration.setMatchingStrategy(MatchingStrategies.STRICT);
     }
 
-    public Event convertToCategory(EventInputDto eventInputDto) {
-        Event event = modelMapper.map(eventInputDto, Event.class);
-        event.setEventDate(LocalDateTime.parse(eventInputDto.getEventDate(),
-                                FormatConstants.DATE_TIME_FORMATTER).atZone(ZoneId.systemDefault()));
-        return event;
+    public Compilation convertToCompilation(CompilationInputDto categoryInputDto) {
+        return modelMapper.map(categoryInputDto, Compilation.class);
     }
 
-    public EventDto convertToDto(Event event){
-        return modelMapper.map(event, EventDto.class);
-    }
-
-    public EventPublicDto convertToPublicDto(Event event){
-        return modelMapper.map(event, EventPublicDto.class);
+    public CompilationDto convertToDto(Compilation compilation){
+        return modelMapper.map(compilation,CompilationDto.class);
     }
 }

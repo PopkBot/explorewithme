@@ -7,6 +7,12 @@ import main.category.dto.CategoryInputDto;
 import main.category.service.CategoryService;
 import main.category.validator.CategoryCreate;
 import main.category.validator.CategoryUpdate;
+import main.compilation.dto.CompilationDto;
+import main.compilation.dto.CompilationInputDto;
+import main.compilation.dto.CompilationUpdateDto;
+import main.compilation.service.CompilationService;
+import main.compilation.validator.CompilationCreate;
+import main.compilation.validator.CompilationUpdate;
 import main.event.dto.EventDto;
 import main.event.dto.EventUpdateDto;
 import main.event.dto.GetEventsParamsDto;
@@ -33,10 +39,11 @@ public class AdminUser {
     private final UserService userService;
     private final CategoryService categoryService;
     private final EventService eventService;
+    private final CompilationService compilationService;
 
     @GetMapping("/users")
     @ResponseStatus(HttpStatus.OK)
-    public List<UserDto> getListOfUsers(@RequestParam(defaultValue = "[]") List<Long> ids,
+    public List<UserDto> getListOfUsers(@RequestParam(required = false) List<Long> ids,
                                         @RequestParam(defaultValue = "0") Integer from,
                                         @RequestParam(defaultValue = "10") Integer size) {
         GetUserListParamsDto paramsDto = GetUserListParamsDto.builder()
@@ -115,4 +122,27 @@ public class AdminUser {
         log.info("Request from admin for event {} update {}",eventId,eventUpdateDto);
         return eventService.updateEvent(eventId,eventUpdateDto);
     }
+
+    @PostMapping("/compilations")
+    @ResponseStatus(HttpStatus.CREATED)
+    public CompilationDto createCompilation(@CompilationCreate @RequestBody CompilationInputDto dto){
+        log.info("Request for compilation creating {}",dto);
+        return compilationService.createCompilation(dto);
+    }
+
+    @DeleteMapping("/compilations/{compId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteCompilation(@PathVariable Long compId){
+        log.info("Request for compilation deleting {}",compId);
+        compilationService.deleteCompilation(compId);
+    }
+
+    @PatchMapping("/compilations/{compId}")
+    @ResponseStatus(HttpStatus.OK)
+    public CompilationDto patchCompilation(@CompilationUpdate @RequestBody CompilationUpdateDto dto,
+                                           @PathVariable Long compId){
+        log.info("Request for compilation patching {}",dto);
+        return compilationService.patchCompilation(compId,dto);
+    }
+
 }
