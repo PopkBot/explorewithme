@@ -1,7 +1,6 @@
 package main.compilation.validator;
 
 
-import main.category.dto.CategoryInputDto;
 import main.compilation.dto.CompilationInputDto;
 import main.exceptions.ValidationException;
 
@@ -13,12 +12,12 @@ public class CompilationCreateValidator implements ConstraintValidator<Compilati
     @Override
     public boolean isValid(CompilationInputDto compilation, ConstraintValidatorContext constraintValidatorContext) {
 
-       if(compilation.getPinned() == null){
-           throw new ValidationException("Pinned cannot be null");
-       }
-       if(compilation.getTitle() == null || compilation.getTitle().isBlank()){
-           throw new ValidationException("Title cannot be blank");
-       }
+        if (compilation.getTitle() == null || compilation.getTitle().length() > 50) {
+            throw new ValidationException("Title cannot be longer then 50 characters");
+        }
+        if (compilation.getTitle().isBlank()) {
+            throw new ValidationException("Title cannot be blank");
+        }
         return true;
     }
 }

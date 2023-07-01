@@ -1,7 +1,6 @@
 package main.compilation.validator;
 
 
-import main.category.dto.CategoryInputDto;
 import main.compilation.dto.CompilationUpdateDto;
 import main.exceptions.ValidationException;
 
@@ -13,6 +12,9 @@ public class CompilationUpdateValidator implements ConstraintValidator<Compilati
     @Override
     public boolean isValid(CompilationUpdateDto compilation, ConstraintValidatorContext constraintValidatorContext) {
 
+        if (compilation.getTitle() != null && compilation.getTitle().length() > 50) {
+            throw new ValidationException("Title cannot be blank");
+        }
         if (compilation.getTitle() != null && compilation.getTitle().isBlank()) {
             throw new ValidationException("Title cannot be blank");
         }

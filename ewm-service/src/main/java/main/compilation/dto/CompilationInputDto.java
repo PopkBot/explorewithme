@@ -9,6 +9,6 @@ import java.util.Set;
 public class CompilationInputDto {
     private Set<Long> events = new HashSet<>();
     private Long id;
-    private Boolean pinned;
+    private Boolean pinned = false;
     private String title;
 }

@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class CategoryServiceImp implements CategoryService{
+public class CategoryServiceImp implements CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
@@ -31,11 +31,11 @@ public class CategoryServiceImp implements CategoryService{
     @Override
     @Transactional
     public CategoryDto createCategory(CategoryInputDto inputDto) {
-        if(categoryRepository.findByName(inputDto.getName()).isPresent()){
+        if (categoryRepository.findByName(inputDto.getName()).isPresent()) {
             throw new ObjectAlreadyExistsException("Category already exists");
         }
         Category category = categoryRepository.save(categoryMapper.convertToCategory(inputDto));
-        log.info("Category has been created {}",category);
+        log.info("Category has been created {}", category);
         return categoryMapper.convertToDto(category);
     }
 
@@ -43,9 +43,9 @@ public class CategoryServiceImp implements CategoryService{
     @Transactional
     public void deleteCategory(Long id) {
         Category category = categoryRepository.findById(id).orElseThrow(
-                ()-> new ObjectNotFoundException("Category not found")
+                () -> new ObjectNotFoundException("Category not found")
         );
-        if(eventRepository.findCategoryUsages(id).getCountId()>0){
+        if (eventRepository.findCategoryUsages(id).getCountId() > 0) {
             throw new ConflictException("Cannot delete category with related events");
         }
         categoryRepository.delete(category);
@@ -56,20 +56,20 @@ public class CategoryServiceImp implements CategoryService{
     @Transactional
     public CategoryDto patchCategory(CategoryInputDto inputDto, Long id) {
         Category category = categoryRepository.findById(id).orElseThrow(
-                ()-> new ObjectNotFoundException("Category not found")
+                () -> new ObjectNotFoundException("Category not found")
         );
-        if(categoryRepository.findByName(inputDto.getName()).isPresent()){
+        if (categoryRepository.findByNameAndIdNot(inputDto.getName(), id).isPresent()) {
             throw new ObjectAlreadyExistsException("Category already exists");
         }
         category.setName(inputDto.getName());
         category = categoryRepository.save(category);
-        log.info("Category has been updated {}",category);
+        log.info("Category has been updated {}", category);
         return categoryMapper.convertToDto(category);
     }
 
     @Override
     public List<CategoryDto> getListOfCategories(Integer from, Integer size) {
-        Pageable page = new CustomPageRequest(from,size);
+        Pageable page = new CustomPageRequest(from, size);
         List<CategoryDto> categoryDtos = categoryRepository.findAll(page).getContent()
                 .stream().map(categoryMapper::convertToDto).collect(Collectors.toList());
         log.info("List of categories has been returned");
@@ -79,9 +79,9 @@ public class CategoryServiceImp implements CategoryService{
     @Override
     public CategoryDto getCategoryById(Long id) {
         Category category = categoryRepository.findById(id).orElseThrow(
-                ()-> new ObjectNotFoundException("Category not found")
+                () -> new ObjectNotFoundException("Category not found")
         );
-        log.info("Category has been returned {}",category);
+        log.info("Category has been returned {}", category);
         return categoryMapper.convertToDto(category);
     }
 

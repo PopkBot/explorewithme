@@ -1,9 +1,7 @@
 package main.compilation.model;
 
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.*;
 import main.event.model.Event;
-import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.*;
 import java.util.Set;

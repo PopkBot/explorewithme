@@ -57,28 +57,28 @@ public class AdminUser {
 
     @PostMapping("/users")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDto createUser(@UserCreate @RequestBody UserInputDto userInputDto){
-        log.info("Request for user creating {}",userInputDto);
+    public UserDto createUser(@UserCreate @RequestBody UserInputDto userInputDto) {
+        log.info("Request for user creating {}", userInputDto);
         return userService.createUser(userInputDto);
     }
 
     @DeleteMapping("/users/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteUser(@PathVariable Long userId){
-        log.info("Request for user deleting {}",userId);
+    public void deleteUser(@PathVariable Long userId) {
+        log.info("Request for user deleting {}", userId);
         userService.deleteUser(userId);
     }
 
     @PostMapping("/categories")
     @ResponseStatus(HttpStatus.CREATED)
-    public CategoryDto createCategory(@CategoryCreate @RequestBody CategoryInputDto categoryInputDto){
+    public CategoryDto createCategory(@CategoryCreate @RequestBody CategoryInputDto categoryInputDto) {
         log.info("Request for category creating");
         return categoryService.createCategory(categoryInputDto);
     }
 
     @DeleteMapping("/categories/{catId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteCategory(@PathVariable Long catId){
+    public void deleteCategory(@PathVariable Long catId) {
         log.info("Request for category deleting");
         categoryService.deleteCategory(catId);
     }
@@ -86,9 +86,9 @@ public class AdminUser {
     @PatchMapping("/categories/{catId}")
     @ResponseStatus(HttpStatus.OK)
     public CategoryDto updateCategory(@CategoryUpdate @RequestBody CategoryInputDto categoryInputDto,
-                                      @PathVariable Long catId){
-        log.info("Request for category patching {}",categoryInputDto);
-        return categoryService.patchCategory(categoryInputDto,catId);
+                                      @PathVariable Long catId) {
+        log.info("Request for category patching {}", categoryInputDto);
+        return categoryService.patchCategory(categoryInputDto, catId);
     }
 
     @GetMapping("/events")
@@ -99,7 +99,7 @@ public class AdminUser {
                                     @RequestParam(required = false) String rangeStart,
                                     @RequestParam(required = false) String rangeEnd,
                                     @RequestParam(defaultValue = "0") Integer from,
-                                    @RequestParam(defaultValue = "10") Integer size){
+                                    @RequestParam(defaultValue = "10") Integer size) {
         GetEventsParamsDto paramsDto = GetEventsParamsDto.builder()
                 .users(users)
                 .states(states)
@@ -110,39 +110,39 @@ public class AdminUser {
                 .size(size)
                 .build();
         paramsDto.validate();
-        log.info("Request for events {}",paramsDto.toString());
+        log.info("Request for events {}", paramsDto.toString());
         return eventService.getEvents(paramsDto);
     }
 
     @PatchMapping("/events/{eventId}")
     @ResponseStatus(HttpStatus.OK)
     public EventDto updateEvent(@PathVariable Long eventId,
-                                @EventUpdate @RequestBody EventUpdateDto eventUpdateDto){
+                                @EventUpdate @RequestBody EventUpdateDto eventUpdateDto) {
         eventUpdateDto.setAccess(Access.ADMIN);
-        log.info("Request from admin for event {} update {}",eventId,eventUpdateDto);
-        return eventService.updateEvent(eventId,eventUpdateDto);
+        log.info("Request from admin for event {} update {}", eventId, eventUpdateDto);
+        return eventService.updateEvent(eventId, eventUpdateDto);
     }
 
     @PostMapping("/compilations")
     @ResponseStatus(HttpStatus.CREATED)
-    public CompilationDto createCompilation(@CompilationCreate @RequestBody CompilationInputDto dto){
-        log.info("Request for compilation creating {}",dto);
+    public CompilationDto createCompilation(@CompilationCreate @RequestBody CompilationInputDto dto) {
+        log.info("Request for compilation creating {}", dto);
         return compilationService.createCompilation(dto);
     }
 
     @DeleteMapping("/compilations/{compId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteCompilation(@PathVariable Long compId){
-        log.info("Request for compilation deleting {}",compId);
+    public void deleteCompilation(@PathVariable Long compId) {
+        log.info("Request for compilation deleting {}", compId);
         compilationService.deleteCompilation(compId);
     }
 
     @PatchMapping("/compilations/{compId}")
     @ResponseStatus(HttpStatus.OK)
     public CompilationDto patchCompilation(@CompilationUpdate @RequestBody CompilationUpdateDto dto,
-                                           @PathVariable Long compId){
-        log.info("Request for compilation patching {}",dto);
-        return compilationService.patchCompilation(compId,dto);
+                                           @PathVariable Long compId) {
+        log.info("Request for compilation patching {}", dto);
+        return compilationService.patchCompilation(compId, dto);
     }
 
 }

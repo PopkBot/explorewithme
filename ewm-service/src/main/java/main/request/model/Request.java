@@ -20,13 +20,13 @@ public class Request {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "event_id",nullable = false)
+    @Column(name = "event_id", nullable = false)
     private Long event;
-    @Column(name = "requester_id",nullable = false)
+    @Column(name = "requester_id", nullable = false)
     private Long requester;
-    @Column(name = "created",nullable = false)
+    @Column(name = "created", nullable = false)
     private ZonedDateTime created;
-    @Column(name = "status",nullable = false)
+    @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
     private State status;
 

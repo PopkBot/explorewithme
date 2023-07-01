@@ -31,13 +31,13 @@ public class GetEventsParamsDto {
     private Boolean onlyAvailable;
     private SortType sort;
 
-    public void validate(){
-        if(this.getRangeEnd() !=null && this.getRangeStart() !=null){
+    public void validate() {
+        if (this.getRangeEnd() != null && this.getRangeStart() != null) {
             ZonedDateTime start = LocalDateTime.parse(this.getRangeStart(), FormatConstants.DATE_TIME_FORMATTER)
                     .atZone(ZoneId.systemDefault());
             ZonedDateTime end = LocalDateTime.parse(this.getRangeEnd(), FormatConstants.DATE_TIME_FORMATTER)
                     .atZone(ZoneId.systemDefault());
-            if(start.isAfter(end)){
+            if (start.isAfter(end)) {
                 throw new ValidationException("End date cannot be before start");
             }
         }

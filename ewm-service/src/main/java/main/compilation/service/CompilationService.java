@@ -13,7 +13,7 @@ public interface CompilationService {
 
     void deleteCompilation(Long id);
 
-    CompilationDto patchCompilation(Long id,CompilationUpdateDto dto);
+    CompilationDto patchCompilation(Long id, CompilationUpdateDto dto);
 
     List<CompilationDto> getCompilations(CompilationGetParameters parameters);
 

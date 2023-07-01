@@ -1,9 +1,6 @@
 package main.event.mapper;
 
 import constants.FormatConstants;
-import main.category.dto.CategoryDto;
-import main.category.dto.CategoryInputDto;
-import main.category.model.Category;
 import main.event.dto.EventDto;
 import main.event.dto.EventInputDto;
 import main.event.dto.EventPublicDto;
@@ -18,7 +15,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 
 @Component
 public class EventMapper {
@@ -39,15 +35,15 @@ public class EventMapper {
     public Event convertToCategory(EventInputDto eventInputDto) {
         Event event = modelMapper.map(eventInputDto, Event.class);
         event.setEventDate(LocalDateTime.parse(eventInputDto.getEventDate(),
-                                FormatConstants.DATE_TIME_FORMATTER).atZone(ZoneId.systemDefault()));
+                FormatConstants.DATE_TIME_FORMATTER).atZone(ZoneId.systemDefault()));
         return event;
     }
 
-    public EventDto convertToDto(Event event){
+    public EventDto convertToDto(Event event) {
         return modelMapper.map(event, EventDto.class);
     }
 
-    public EventPublicDto convertToPublicDto(Event event){
+    public EventPublicDto convertToPublicDto(Event event) {
         return modelMapper.map(event, EventPublicDto.class);
     }
 }

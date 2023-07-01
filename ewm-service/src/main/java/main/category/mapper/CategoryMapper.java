@@ -31,7 +31,7 @@ public class CategoryMapper {
         return modelMapper.map(categoryInputDto, Category.class);
     }
 
-    public CategoryDto convertToDto(Category category){
-        return modelMapper.map(category,CategoryDto.class);
+    public CategoryDto convertToDto(Category category) {
+        return modelMapper.map(category, CategoryDto.class);
     }
 }

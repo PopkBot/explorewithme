@@ -2,7 +2,6 @@ package main.event.repository;
 
 import main.category.projection.CategoryCountProjection;
 import main.event.model.Event;
-import main.event.projection.EventCountProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;

@@ -1,9 +1,5 @@
 package main.request.mapper;
 
-import constants.FormatConstants;
-import main.event.dto.EventDto;
-import main.event.dto.EventInputDto;
-import main.event.model.Event;
 import main.request.dto.RequestDto;
 import main.request.model.Request;
 import org.modelmapper.ModelMapper;
@@ -13,9 +9,6 @@ import org.modelmapper.convention.NameTokenizers;
 import org.modelmapper.convention.NamingConventions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 
 @Component
 public class RequestMapper {
@@ -33,7 +26,7 @@ public class RequestMapper {
         configuration.setMatchingStrategy(MatchingStrategies.STRICT);
     }
 
-    public RequestDto convertToDto(Request request){
+    public RequestDto convertToDto(Request request) {
         return modelMapper.map(request, RequestDto.class);
     }
 }

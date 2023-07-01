@@ -12,4 +12,6 @@ public interface StatService {
 
     List<StatProjection> getStats(StatsParamDto statsParamDto);
 
+    Boolean isContainHitByIp(String uri, String ip);
+
 }

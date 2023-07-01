@@ -40,6 +40,11 @@ public class StatServiceImpl implements StatService {
         return statOutDtos;
     }
 
+    @Override
+    public Boolean isContainHitByIp(String uri, String ip) {
+        return hitRepository.findByUriAndIp(uri, ip).isPresent();
+    }
+
     private List<StatProjection> queryForStats(@StatsParamValidation StatsParamDto statsParamDto) {
         Timestamp start = Timestamp.valueOf(statsParamDto.getStart());
         Timestamp end = Timestamp.valueOf(statsParamDto.getEnd());

@@ -17,7 +17,7 @@ public class QEvent extends EntityPathBase<Event> {
 
     public final NumberPath<Long> initiator = createNumber("initiator.id", Long.class);
 
-    public final EnumPath<State> state = createEnum("state",State.class);
+    public final EnumPath<State> state = createEnum("state", State.class);
 
     public final NumberPath<Long> category = createNumber("category.id", Long.class);
 

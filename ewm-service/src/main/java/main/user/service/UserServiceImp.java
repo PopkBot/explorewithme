@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class UserServiceImp implements UserService{
+public class UserServiceImp implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
@@ -29,26 +29,26 @@ public class UserServiceImp implements UserService{
     @Override
     @Transactional
     public UserDto createUser(UserInputDto userInputDto) {
-        if(userRepository.findByEmail(userInputDto.getEmail()).isPresent()){
+        if (userRepository.findByEmail(userInputDto.getEmail()).isPresent()) {
             throw new ObjectAlreadyExistsException("Email is already taken");
         }
         User user = userRepository.save(userMapper.convertToUser(userInputDto));
-        log.info("User has been created {}",user);
+        log.info("User has been created {}", user);
         return userMapper.convertToDto(user);
     }
 
     @Override
     public List<UserDto> getUsers(GetUserListParamsDto paramsDto) {
-        Pageable page = new CustomPageRequest(paramsDto.getFrom(),paramsDto.getSize());
+        Pageable page = new CustomPageRequest(paramsDto.getFrom(), paramsDto.getSize());
         List<UserDto> userDtos;
-        if(paramsDto.getIds()!= null && paramsDto.getIds().size()!=0){
-            userDtos = userRepository.findAllByIdIn(paramsDto.getIds(),page).getContent()
+        if (paramsDto.getIds() != null && paramsDto.getIds().size() != 0) {
+            userDtos = userRepository.findAllByIdIn(paramsDto.getIds(), page).getContent()
                     .stream().map(userMapper::convertToDto).collect(Collectors.toList());
         } else {
             userDtos = userRepository.findAll(page).getContent()
                     .stream().map(userMapper::convertToDto).collect(Collectors.toList());
         }
-        log.info("Page of users has been returned {}",userDtos);
+        log.info("Page of users has been returned {}", userDtos);
         return userDtos;
 
     }
@@ -57,9 +57,9 @@ public class UserServiceImp implements UserService{
     @Transactional
     public void deleteUser(Long id) {
         User user = userRepository.findById(id).orElseThrow(
-                ()-> new ObjectNotFoundException("User not found")
+                () -> new ObjectNotFoundException("User not found")
         );
         userRepository.delete(user);
-        log.info("User has been deleted {}",user);
+        log.info("User has been deleted {}", user);
     }
 }

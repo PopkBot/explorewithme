@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import constants.FormatConstants;
 import lombok.Data;
 import main.category.dto.CategoryDto;
-import main.event.model.Location;
 import main.user.dto.UserDto;
 
 import java.time.ZonedDateTime;

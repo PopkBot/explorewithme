@@ -21,16 +21,16 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
     List<Request> findAllByEventAndStatus(Long eventId, State status);
 
     @Modifying
-    @Query(nativeQuery = true, value = "UPDATE requests SET status = ?1 "+
+    @Query(nativeQuery = true, value = "UPDATE requests SET status = ?1 " +
             "WHERE id IN(?2) AND status = ?3")
     void setStatusOfRequests(String newStatus, List<Long> ids, String checkStatus);
 
     @Modifying
-    @Query(nativeQuery = true, value = "UPDATE requests SET status = ?1 "+
+    @Query(nativeQuery = true, value = "UPDATE requests SET status = ?1 " +
             "WHERE status = ?2")
     void setStatusOfRequests(String newStatus, String checkStatus);
 
-    @Query(nativeQuery = true, value = "SELECT COUNT(id) AS countId FROM requests WHERE status = ?1 AND "+
+    @Query(nativeQuery = true, value = "SELECT COUNT(id) AS countId FROM requests WHERE status = ?1 AND " +
             "event_id = ?2 AND id IN (?3)")
-    RequestCountProjection countStatusRequests(String state, Long eventId , List<Long> requestersIds);
+    RequestCountProjection countStatusRequests(String state, Long eventId, List<Long> requestersIds);
 }

@@ -32,12 +32,12 @@ public class UserMapper {
         return modelMapper.map(userInputDto, User.class);
     }
 
-    public UserDto convertToDto(User user){
-        return modelMapper.map(user,UserDto.class);
+    public UserDto convertToDto(User user) {
+        return modelMapper.map(user, UserDto.class);
     }
 
-    public UserShortDto convertToShortDto(User user){
-        return modelMapper.map(user,UserShortDto.class);
+    public UserShortDto convertToShortDto(User user) {
+        return modelMapper.map(user, UserShortDto.class);
     }
 
 }

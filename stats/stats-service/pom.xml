@@ -79,10 +79,6 @@
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
                         </exclude>
-                        <exclude>
-                            <groupId>ru.practicum</groupId>
-                            <artifactId>stats-client</artifactId>
-                        </exclude>
                     </excludes>
                 </configuration>
             </plugin>

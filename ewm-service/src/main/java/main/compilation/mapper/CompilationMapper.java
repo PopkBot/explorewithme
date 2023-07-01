@@ -1,8 +1,5 @@
 package main.compilation.mapper;
 
-import main.category.dto.CategoryDto;
-import main.category.dto.CategoryInputDto;
-import main.category.model.Category;
 import main.compilation.dto.CompilationDto;
 import main.compilation.dto.CompilationInputDto;
 import main.compilation.model.Compilation;
@@ -34,7 +31,7 @@ public class CompilationMapper {
         return modelMapper.map(categoryInputDto, Compilation.class);
     }
 
-    public CompilationDto convertToDto(Compilation compilation){
-        return modelMapper.map(compilation,CompilationDto.class);
+    public CompilationDto convertToDto(Compilation compilation) {
+        return modelMapper.map(compilation, CompilationDto.class);
     }
 }

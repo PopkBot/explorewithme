@@ -1,7 +1,7 @@
 package main.event.service;
 
+import dto.HitInputDto;
 import main.event.dto.*;
-import main.event.model.Event;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ public interface EventService {
 
     EventDto getEventById(Long userId, Long eventId);
 
-    EventDto getEventByIdPublic(Long eventId);
+    EventDto getEventByIdPublic(Long eventId, HitInputDto hitDto);
 
-    List<EventPublicDto> getEventsPublic(GetEventsParamsDto paramsDto);
+    List<EventPublicDto> getEventsPublic(GetEventsParamsDto paramsDto, HitInputDto hitDto);
 }

@@ -2,8 +2,6 @@ package main.category.service;
 
 import main.category.dto.CategoryDto;
 import main.category.dto.CategoryInputDto;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 

@@ -3,7 +3,6 @@ package main.user.service;
 import main.user.dto.GetUserListParamsDto;
 import main.user.dto.UserDto;
 import main.user.dto.UserInputDto;
-import main.user.model.User;
 
 import java.util.List;
 

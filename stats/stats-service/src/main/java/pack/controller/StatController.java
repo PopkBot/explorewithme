@@ -31,6 +31,13 @@ public class StatController {
         statService.addHit(hitInputDto);
     }
 
+    @GetMapping("/hit/checkIp")
+    @ResponseStatus(HttpStatus.OK)
+    public Boolean checkHitsByIp(@RequestParam String uri,
+                                 @RequestParam String ip) {
+        return statService.isContainHitByIp(uri, ip);
+    }
+
     @GetMapping("/stats")
     public List<StatProjection> getStats(@RequestParam(required = true) String start,
                                          @RequestParam(required = true) String end,

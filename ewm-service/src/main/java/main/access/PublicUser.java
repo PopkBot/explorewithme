@@ -1,5 +1,7 @@
 package main.access;
 
+import constants.FormatConstants;
+import dto.HitInputDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import main.category.dto.CategoryDto;
@@ -16,6 +18,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @RestController
@@ -31,15 +36,15 @@ public class PublicUser {
     @GetMapping("/categories")
     @ResponseStatus(HttpStatus.OK)
     public List<CategoryDto> getListOfCategories(@RequestParam(defaultValue = "0") Integer from,
-                                                 @RequestParam(defaultValue = "10") Integer size){
+                                                 @RequestParam(defaultValue = "10") Integer size) {
         log.info("Request for categories list");
-        return categoryService.getListOfCategories(from,size);
+        return categoryService.getListOfCategories(from, size);
     }
 
     @GetMapping("/categories/{catId}")
     @ResponseStatus(HttpStatus.OK)
-    public CategoryDto getCategoryById(@PathVariable Long catId){
-        log.info("Request for category {}",catId);
+    public CategoryDto getCategoryById(@PathVariable Long catId) {
+        log.info("Request for category {}", catId);
         return categoryService.getCategoryById(catId);
     }
 
@@ -53,7 +58,8 @@ public class PublicUser {
                                           @RequestParam(required = false) Boolean onlyAvailable,
                                           @RequestParam(defaultValue = "VIEWS") String sort,
                                           @RequestParam(defaultValue = "0") Integer from,
-                                          @RequestParam(defaultValue = "10") Integer size){
+                                          @RequestParam(defaultValue = "10") Integer size,
+                                          HttpServletRequest request) {
         GetEventsParamsDto dto = GetEventsParamsDto.builder()
                 .searchText(text)
                 .categories(categories)
@@ -66,37 +72,50 @@ public class PublicUser {
                 .from(from)
                 .build();
         dto.validate();
-        log.info("Request for events {}",dto);
-        return eventService.getEventsPublic(dto);
+        HitInputDto hitInputDto = HitInputDto.builder()
+                .ip(request.getRemoteAddr())
+                .uri(request.getRequestURI())
+                .app("Explore with me")
+                .timestamp(LocalDateTime.now(ZoneId.systemDefault()).format(FormatConstants.DATE_TIME_FORMATTER))
+                .build();
+        log.info("Request for events {}", dto);
+        return eventService.getEventsPublic(dto, hitInputDto);
     }
 
     @GetMapping("/events/{eventId}")
     @ResponseStatus(HttpStatus.OK)
-    public EventDto getEventById(@PathVariable Long eventId){
-        log.info("Public request for event {}",eventId);
-        return eventService.getEventByIdPublic(eventId);
+    public EventDto getEventById(@PathVariable Long eventId,
+                                 HttpServletRequest request) {
+        HitInputDto hitInputDto = HitInputDto.builder()
+                .ip(request.getRemoteAddr())
+                .uri(request.getRequestURI())
+                .app("Explore with me")
+                .timestamp(LocalDateTime.now(ZoneId.systemDefault()).format(FormatConstants.DATE_TIME_FORMATTER))
+                .build();
+        log.info("Public request for event {}", eventId);
+        return eventService.getEventByIdPublic(eventId, hitInputDto);
     }
 
     @GetMapping("/compilations")
     @ResponseStatus(HttpStatus.OK)
-    public List<CompilationDto> getCompilations(@RequestParam(defaultValue = "true") Boolean pinned,
+    public List<CompilationDto> getCompilations(@RequestParam(required = false) Boolean pinned,
                                                 @RequestParam(defaultValue = "0") Integer from,
-                                                @RequestParam(defaultValue = "10") Integer size){
+                                                @RequestParam(defaultValue = "10") Integer size) {
 
         CompilationGetParameters dto = CompilationGetParameters.builder()
                 .pinned(pinned)
                 .from(from)
                 .size(size)
                 .build();
-        log.info("List of compilations has been requested {}",dto);
+        log.info("List of compilations has been requested {}", dto);
         return compilationService.getCompilations(dto);
     }
 
     @GetMapping("/compilations/{compId}")
     @ResponseStatus(HttpStatus.OK)
-    public CompilationDto getCompilationById(@PathVariable Long compId){
+    public CompilationDto getCompilationById(@PathVariable Long compId) {
 
-        log.info("Compilation has been requested {}",compId);
+        log.info("Compilation has been requested {}", compId);
         return compilationService.getCompilationById(compId);
     }
 

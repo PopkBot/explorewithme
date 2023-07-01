@@ -32,80 +32,80 @@ public class PrivateUser {
     @PostMapping("/{userId}/events")
     @ResponseStatus(HttpStatus.CREATED)
     public EventDto createEvent(@EventCreate @RequestBody EventInputDto eventInputDto,
-                                @PathVariable Long userId){
-        log.info("Request for event adding by user {} {}",userId,eventInputDto);
-        return eventService.createEvent(eventInputDto,userId);
+                                @PathVariable Long userId) {
+        log.info("Request for event adding by user {} {}", userId, eventInputDto);
+        return eventService.createEvent(eventInputDto, userId);
     }
 
     @PostMapping("/{userId}/requests")
     @ResponseStatus(HttpStatus.CREATED)
-    public RequestDto createRequest(@PathVariable Long userId, @RequestParam Long eventId){
-        log.info("Request for request creating, userId {}, eventId {}",userId,eventId);
-        return requestService.createRequest(userId,eventId);
+    public RequestDto createRequest(@PathVariable Long userId, @RequestParam Long eventId) {
+        log.info("Request for request creating, userId {}, eventId {}", userId, eventId);
+        return requestService.createRequest(userId, eventId);
     }
 
     @GetMapping("/{userId}/requests")
     @ResponseStatus(HttpStatus.OK)
-    public List<RequestDto> getUsersRequests(@PathVariable Long userId){
-        log.info("Request for user`s {} requests",userId);
+    public List<RequestDto> getUsersRequests(@PathVariable Long userId) {
+        log.info("Request for user`s {} requests", userId);
         return requestService.getRequestsByUserId(userId);
     }
 
     @PatchMapping("/{userId}/requests/{requestId}/cancel")
     @ResponseStatus(HttpStatus.OK)
-    public RequestDto cancelRequest(@PathVariable Long userId, @PathVariable Long requestId){
-        log.info("Request for canceling user`s {} request {}",userId,requestId);
-        return requestService.cancelRequest(userId,requestId);
+    public RequestDto cancelRequest(@PathVariable Long userId, @PathVariable Long requestId) {
+        log.info("Request for canceling user`s {} request {}", userId, requestId);
+        return requestService.cancelRequest(userId, requestId);
     }
 
     @GetMapping("/{userId}/events")
     @ResponseStatus(HttpStatus.OK)
     public List<EventDto> getUserEvents(@PathVariable Long userId,
                                         @RequestParam(defaultValue = "0") Integer from,
-                                        @RequestParam(defaultValue = "10") Integer size){
+                                        @RequestParam(defaultValue = "10") Integer size) {
         GetEventsParamsDto paramsDto = GetEventsParamsDto.builder()
                 .users(List.of(userId))
                 .from(from)
                 .size(size)
                 .build();
         paramsDto.validate();
-        log.info("Request for user`s {} events {}",userId,paramsDto);
+        log.info("Request for user`s {} events {}", userId, paramsDto);
 
         return eventService.getEvents(paramsDto);
     }
 
     @GetMapping("/{userId}/events/{eventId}")
     @ResponseStatus(HttpStatus.OK)
-    public EventDto getEventById(@PathVariable Long userId, @PathVariable Long eventId){
-        log.info("Request for user`s {} event {}",userId, eventId);
-        return eventService.getEventById(userId,eventId);
+    public EventDto getEventById(@PathVariable Long userId, @PathVariable Long eventId) {
+        log.info("Request for user`s {} event {}", userId, eventId);
+        return eventService.getEventById(userId, eventId);
     }
 
     @PatchMapping("/{userId}/events/{eventId}")
     @ResponseStatus(HttpStatus.OK)
     public EventDto updateEvent(@PathVariable Long userId,
                                 @PathVariable Long eventId,
-                                @EventUpdate @RequestBody EventUpdateDto eventUpdateDto){
+                                @EventUpdate @RequestBody EventUpdateDto eventUpdateDto) {
         eventUpdateDto.setAccess(Access.PRIVATE);
         eventUpdateDto.setUserId(userId);
-        log.info("Request from user {} for event {} update {}", userId, eventId,eventUpdateDto);
-        return eventService.updateEvent(eventId,eventUpdateDto);
+        log.info("Request from user {} for event {} update {}", userId, eventId, eventUpdateDto);
+        return eventService.updateEvent(eventId, eventUpdateDto);
     }
 
     @GetMapping("/{userId}/events/{eventId}/requests")
     @ResponseStatus(HttpStatus.OK)
-    public List<RequestDto> getRequestsForEvent(@PathVariable Long userId, @PathVariable Long eventId){
-        log.info("Request for event {} requests",eventId);
-        return requestService.getEventRequests(userId,eventId);
+    public List<RequestDto> getRequestsForEvent(@PathVariable Long userId, @PathVariable Long eventId) {
+        log.info("Request for event {} requests", eventId);
+        return requestService.getEventRequests(userId, eventId);
     }
 
     @PatchMapping("/{userId}/events/{eventId}/requests")
     @ResponseStatus(HttpStatus.OK)
     public StatusSettingDto setRequestsStatus(@PathVariable Long userId,
                                               @PathVariable Long eventId,
-                                              @RequestBody StatusSettingInputDto dto){
-        log.info("Request for status setting {}",dto);
-        return requestService.setStatusOfRequests(userId,eventId,dto);
+                                              @RequestBody StatusSettingInputDto dto) {
+        log.info("Request for status setting {}", dto);
+        return requestService.setStatusOfRequests(userId, eventId, dto);
     }
 
 }
