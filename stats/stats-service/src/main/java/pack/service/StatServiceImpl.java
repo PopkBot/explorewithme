@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
+import pack.exceptions.ValidationException;
 import pack.mapper.HitMapper;
 import pack.model.Hit;
 import pack.repository.HitRepository;
@@ -35,6 +36,9 @@ public class StatServiceImpl implements StatService {
 
     @Override
     public List<StatProjection> getStats(StatsParamDto statsParamDto) {
+        if (!statsParamDto.getEnd().isAfter(statsParamDto.getStart())) {
+            throw new ValidationException("Start mast be before end");
+        }
         List<StatProjection> statOutDtos = queryForStats(statsParamDto);
         log.info("Statistic returned {}", statOutDtos);
         return statOutDtos;
@@ -42,7 +46,10 @@ public class StatServiceImpl implements StatService {
 
     @Override
     public Boolean isContainHitByIp(String uri, String ip) {
-        return hitRepository.findByUriAndIp(uri, ip).isPresent();
+        if (hitRepository.countHitsByIdAndUri(uri, ip).getCount() == 0) {
+            return false;
+        }
+        return true;
     }
 
     private List<StatProjection> queryForStats(@StatsParamValidation StatsParamDto statsParamDto) {

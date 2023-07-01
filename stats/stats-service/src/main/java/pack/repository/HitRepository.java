@@ -9,15 +9,13 @@ import projection.StatProjection;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public interface HitRepository extends JpaRepository<Hit, Long> {
 
-    Optional<Hit> findByUriAndIp(String uri, String ip);
 
     @Query(nativeQuery = true, value = "SELECT COUNT(id) AS count FROM endpoint_hit " +
-            "WHERE uri = ?1")
-    HitCount countHits(String uri);
+            "WHERE uri = ?1 AND ip = ?2")
+    HitCount countHitsByIdAndUri(String uri, String ip);
 
     @Query(nativeQuery = true,
             value = "SELECT app, uri, COUNT(ip) as hits FROM endpoint_hit " +

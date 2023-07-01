@@ -150,11 +150,10 @@ public class EventServiceImp implements EventService {
         }
         ResponseEntity<Object> response = statClient.checkHitsByIp(hitInputDto.getUri(), hitInputDto.getIp());
         if (!(Boolean) response.getBody()) {
-            statClient.addHit(hitInputDto);
             event.setViews(event.getViews() + 1);
             event = eventRepository.save(event);
         }
-
+        statClient.addHit(hitInputDto);
         log.info("Event has been returned {}", event);
         return eventMapper.convertToDto(event);
     }
