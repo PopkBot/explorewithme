@@ -97,7 +97,7 @@ public class RequestServiceImp implements RequestService {
         Request request = requestRepository.findById(requestId).orElseThrow(
                 () -> new ObjectNotFoundException("Request not found")
         );
-        if (request.getRequester() != userId) {
+        if (!request.getRequester().equals(userId)) {
             throw new ValidationException("User has no access to the request");
         }
         Event event = eventRepository.findById(request.getEvent()).orElseThrow(
