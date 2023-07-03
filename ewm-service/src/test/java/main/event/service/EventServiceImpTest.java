@@ -94,7 +94,7 @@ class EventServiceImpTest extends ContainersEnvironment {
 
         ValidationException ve = Assertions.assertThrows(ValidationException.class,
                 () -> eventService.createEvent(eventInputDto, userDto.getId()));
-        Assertions.assertEquals("Cannot create event 2 hours before start", oe.getMessage());
+        Assertions.assertEquals("Cannot create event 2 hours before start", ve.getMessage());
 
         eventInputDto.setEventDate(LocalDateTime.now().plusHours(10).format(FormatConstants.DATE_TIME_FORMATTER));
         EventDto eventDto = eventService.createEvent(eventInputDto, userDto.getId());
@@ -274,7 +274,7 @@ class EventServiceImpTest extends ContainersEnvironment {
                 .from(0)
                 .size(10)
                 .sort(SortType.EVENT_DATE)
-                .users(List.of(2L, 3L))
+                .users(List.of(userDto2.getId(), userDto3.getId()))
                 .build();
         List<EventDto> eventDtos = eventService.getEvents(paramsDto);
         Assertions.assertEquals(2, eventDtos.size());
@@ -285,7 +285,7 @@ class EventServiceImpTest extends ContainersEnvironment {
                 .from(0)
                 .size(10)
                 .sort(SortType.EVENT_DATE)
-                .categories(List.of(1L))
+                .categories(List.of(categoryDto1.getId()))
                 .build();
         eventDtos = eventService.getEvents(paramsDto);
         Assertions.assertEquals(2, eventDtos.size());
@@ -336,7 +336,7 @@ class EventServiceImpTest extends ContainersEnvironment {
                 .size(10)
                 .sort(SortType.EVENT_DATE)
                 .states(List.of(State.PENDING.name()))
-                .categories(List.of(1L))
+                .categories(List.of(categoryDto1.getId()))
                 .build();
         eventDtos = eventService.getEvents(paramsDto);
         Assertions.assertEquals(1, eventDtos.size());
@@ -633,6 +633,20 @@ class EventServiceImpTest extends ContainersEnvironment {
 
         EventDto getEventDto = eventService.getEventById(userDto1.getId(), eventDto1.getId());
         Assertions.assertEquals(eventDto1, getEventDto);
+
+    }
+
+    /*
+    Следующие тесты вызывают методы, которые обращаются к серверу статистики, но я не нашел способ подключить этот сервис
+    во время выполнения тестов, есть какой-то способ это сделать? Это делается похожим образом как с БД и тест-контейнерами?
+     */
+    @Test
+    void testGetEventByIdPublic() {
+
+    }
+
+    @Test
+    void testGetEventsPublic() {
 
     }
 
