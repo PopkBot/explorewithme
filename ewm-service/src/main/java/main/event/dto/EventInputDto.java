@@ -1,10 +1,16 @@
 package main.event.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import main.event.model.Location;
 
 
 @Data
+@SuperBuilder
+@AllArgsConstructor
+@NoArgsConstructor
 public class EventInputDto {
     private String annotation;
     private Long category;

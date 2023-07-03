@@ -21,8 +21,6 @@ public class QEvent extends EntityPathBase<Event> {
 
     public final NumberPath<Long> category = createNumber("category.id", Long.class);
 
-    public final TimePath<ZonedDateTime> createdOn = createTime("createdOn", ZonedDateTime.class);
-
     public final TimePath<ZonedDateTime> eventDate = createTime("eventDate", ZonedDateTime.class);
 
     public final StringPath annotation = createString("annotation");

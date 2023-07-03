@@ -61,13 +61,11 @@ public class EventServiceImp implements EventService {
                     () -> new ObjectNotFoundException("Category not found")
             );
         }
-
-
         long hoursBefore = 2L;
         if (LocalDateTime.parse(eventInputDto.getEventDate(),
                         FormatConstants.DATE_TIME_FORMATTER).atZone(ZoneId.systemDefault())
                 .isBefore(ZonedDateTime.now(ZoneId.systemDefault()).plusHours(hoursBefore))) {
-            throw new ValidationException("Cannot create event 2 hours before start");
+            throw new ValidationException("Cannot create event " + hoursBefore + " hours before start");
         }
         Event event = eventRepository.save(makeEvent(eventInputDto, user, category));
         log.info("Event has been created {}", event);
