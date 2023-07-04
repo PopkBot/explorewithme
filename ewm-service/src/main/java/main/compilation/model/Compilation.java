@@ -6,12 +6,16 @@ import main.event.model.Event;
 import javax.persistence.*;
 import java.util.Set;
 
+/*
+Я правильно понимаю, что замечание про @EqualsAndHashCode относилось к тому, что в пределах одной
+сессии объекты сущностей БД корректно работают с equals() и hashCode() от Object?
+ */
+
 @Entity
 @Table(name = "compilations")
 @Setter
 @Getter
 @ToString
-@EqualsAndHashCode
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -31,7 +35,6 @@ public class Compilation {
             name = "event_compilation",
             joinColumns = @JoinColumn(name = "compilation_id"),
             inverseJoinColumns = @JoinColumn(name = "event_id")
-
     )
     Set<Event> events;
 }

@@ -71,7 +71,6 @@ public class PublicUser {
                 .size(size)
                 .from(from)
                 .build();
-        dto.validate();
         HitInputDto hitInputDto = HitInputDto.builder()
                 .ip(request.getRemoteAddr())
                 .uri(request.getRequestURI())

@@ -9,7 +9,6 @@ import java.time.ZonedDateTime;
 @Table(name = "endpoint_hit")
 @Getter
 @Setter
-@EqualsAndHashCode
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

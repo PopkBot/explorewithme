@@ -13,7 +13,6 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Builder
 @ToString
-@EqualsAndHashCode
 public class Category {
 
     @Id

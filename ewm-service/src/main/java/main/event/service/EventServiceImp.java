@@ -74,7 +74,7 @@ public class EventServiceImp implements EventService {
 
     @Override
     public List<EventDto> getEvents(GetEventsParamsDto paramsDto) {
-
+        paramsDto.validate();
         BooleanExpression query = QEvent.event.initiator.isNotNull();
         if (paramsDto.getUsers() != null && paramsDto.getUsers().size() != 0) {
             query = query.and(QEvent.event.initiator.in(Set.copyOf(paramsDto.getUsers())));
@@ -158,6 +158,7 @@ public class EventServiceImp implements EventService {
 
     @Override
     public List<EventPublicDto> getEventsPublic(GetEventsParamsDto paramsDto, HitInputDto hitDto) {
+        paramsDto.validate();
         BooleanExpression query = QEvent.event.state.eq(State.PUBLISHED);
         if (paramsDto.getSearchText() != null) {
             query = query.and(QEvent.event.annotation.containsIgnoreCase(paramsDto.getSearchText())

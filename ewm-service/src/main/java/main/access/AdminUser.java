@@ -109,7 +109,6 @@ public class AdminUser {
                 .from(from)
                 .size(size)
                 .build();
-        paramsDto.validate();
         log.info("Request for events {}", paramsDto.toString());
         return eventService.getEvents(paramsDto);
     }

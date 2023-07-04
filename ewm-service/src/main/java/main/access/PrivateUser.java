@@ -68,7 +68,6 @@ public class PrivateUser {
                 .from(from)
                 .size(size)
                 .build();
-        paramsDto.validate();
         log.info("Request for user`s {} events {}", userId, paramsDto);
 
         return eventService.getEvents(paramsDto);
