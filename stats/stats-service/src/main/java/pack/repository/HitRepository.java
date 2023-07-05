@@ -3,6 +3,7 @@ package pack.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import pack.model.Hit;
+import projection.HitCount;
 import projection.StatProjection;
 
 import java.sql.Timestamp;
@@ -10,6 +11,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public interface HitRepository extends JpaRepository<Hit, Long> {
+
+
+    @Query(nativeQuery = true, value = "SELECT COUNT(id) AS count FROM endpoint_hit " +
+            "WHERE uri = ?1 AND ip = ?2")
+    HitCount countHitsByIdAndUri(String uri, String ip);
 
     @Query(nativeQuery = true,
             value = "SELECT app, uri, COUNT(ip) as hits FROM endpoint_hit " +

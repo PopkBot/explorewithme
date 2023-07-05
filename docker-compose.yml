@@ -33,7 +33,7 @@ services:
 
   ewm-service:
     ports:
-      - "8081:8081"
+      - "8080:8080"
     build: ewm-service
     container_name: ewm-service
     depends_on:

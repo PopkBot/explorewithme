@@ -1,6 +1,7 @@
 package pack.mapper;
 
 import constants.FormatConstants;
+import dto.HitDto;
 import dto.HitInputDto;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.config.Configuration;
@@ -35,5 +36,9 @@ public class HitMapper {
         hit.setCreated(LocalDateTime.parse(hitInputDto.getTimestamp(),
                 FormatConstants.DATE_TIME_FORMATTER).atZone(ZoneId.systemDefault()));
         return hit;
+    }
+
+    public HitDto convertToDto(Hit hit) {
+        return modelMapper.map(hit, HitDto.class);
     }
 }
