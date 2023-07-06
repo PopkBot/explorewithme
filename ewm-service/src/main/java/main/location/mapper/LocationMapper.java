@@ -1,27 +1,26 @@
-package main.event.mapper;
+package main.location.mapper;
 
-import constants.FormatConstants;
-import main.event.dto.EventDto;
-import main.event.dto.EventInputDto;
-import main.event.dto.EventPublicDto;
-import main.event.model.Event;
+import main.location.dto.LocationDto;
+import main.location.dto.LocationInputDto;
+import main.location.model.Location;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.config.Configuration;
 import org.modelmapper.convention.MatchingStrategies;
 import org.modelmapper.convention.NameTokenizers;
 import org.modelmapper.convention.NamingConventions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.util.LinkedHashMap;
+
 
 @Component
-public class EventMapper {
+public class LocationMapper {
     private final ModelMapper modelMapper;
 
     @Autowired
-    public EventMapper() {
+    public LocationMapper() {
         this.modelMapper = new ModelMapper();
         Configuration configuration = modelMapper.getConfiguration();
         configuration.setFieldAccessLevel(Configuration.AccessLevel.PUBLIC);
@@ -32,18 +31,21 @@ public class EventMapper {
         configuration.setMatchingStrategy(MatchingStrategies.STRICT);
     }
 
-    public Event convertToEvent(EventInputDto eventInputDto) {
-        Event event = modelMapper.map(eventInputDto, Event.class);
-        event.setEventDate(LocalDateTime.parse(eventInputDto.getEventDate(),
-                FormatConstants.DATE_TIME_FORMATTER).atZone(ZoneId.systemDefault()));
-        return event;
+    public Location convertToModel(LocationInputDto locationInputDto) {
+        return modelMapper.map(locationInputDto, Location.class);
     }
 
-    public EventDto convertToDto(Event event) {
-        return modelMapper.map(event, EventDto.class);
+    public LocationDto convertToDto(Location location) {
+        return modelMapper.map(location, LocationDto.class);
     }
 
-    public EventPublicDto convertToPublicDto(Event event) {
-        return modelMapper.map(event, EventPublicDto.class);
+    public LocationDto convertResponseEntityToDto(ResponseEntity<Object> entity){
+        LinkedHashMap<String,Object> body = (LinkedHashMap<String,Object>) entity.getBody();
+        Object bodyAddress = body.get("address");
+        LinkedHashMap<String,String> locBody = (LinkedHashMap<String,String>)bodyAddress;
+        return LocationDto.builder()
+                .city(locBody.get("city"))
+                .country(locBody.get("country"))
+                .build();
     }
 }

@@ -18,6 +18,9 @@ import main.event.repository.EventRepository;
 import main.exceptions.ConflictException;
 import main.exceptions.ObjectNotFoundException;
 import main.exceptions.ValidationException;
+import main.location.model.Location;
+import main.location.repository.LocationRepository;
+import main.location.service.LocationService;
 import main.user.model.User;
 import main.user.repository.UserRepository;
 import org.springframework.data.domain.Page;
@@ -45,6 +48,8 @@ public class EventServiceImp implements EventService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final EventMapper eventMapper;
+    private final LocationService locationService;
+    private final LocationRepository locationRepository;
     private final StatClient statClient;
 
     @Override
@@ -67,6 +72,7 @@ public class EventServiceImp implements EventService {
                 .isBefore(ZonedDateTime.now(ZoneId.systemDefault()).plusHours(hoursBefore))) {
             throw new ValidationException("Cannot create event " + hoursBefore + " hours before start");
         }
+
         Event event = eventRepository.save(makeEvent(eventInputDto, user, category));
         log.info("Event has been created {}", event);
         return eventMapper.convertToDto(event);
@@ -116,6 +122,7 @@ public class EventServiceImp implements EventService {
             case PRIVATE:
                 updateEventPrivate(event, eventUpdateDto);
                 break;
+            default: throw new ObjectNotFoundException("Unknown access");
         }
         event = eventRepository.save(event);
         log.info("Event has been updated {}", event);
@@ -222,7 +229,7 @@ public class EventServiceImp implements EventService {
 
     private void updateEventPrivate(Event event, EventUpdateDto eventUpdateDto) {
         long hoursBefore = 2L;
-        userRepository.findById(eventUpdateDto.getUserId()).orElseThrow(
+        User user = userRepository.findById(eventUpdateDto.getUserId()).orElseThrow(
                 () -> new ObjectNotFoundException("User not found")
         );
         if (!event.getInitiator().getId().equals(eventUpdateDto.getUserId())) {
@@ -262,7 +269,7 @@ public class EventServiceImp implements EventService {
             event.setEventDate(date);
         }
         if (eventUpdateDto.getLocation() != null) {
-            event.setLocation(eventUpdateDto.getLocation());
+            updateEventLocation(event,eventUpdateDto);
         }
         if (eventUpdateDto.getPaid() != null) {
             event.setPaid(eventUpdateDto.getPaid());
@@ -278,6 +285,47 @@ public class EventServiceImp implements EventService {
         }
     }
 
+    private void updateEventLocation(Event event, EventUpdateDto eventUpdateDto) {
+
+        Location location;
+        switch (eventUpdateDto.getAccess()) {
+            case ADMIN:
+                location = updateEventLocationAdmin(event,eventUpdateDto);
+                break;
+            case PRIVATE:
+                location = updateEventLocationPrivate(event,eventUpdateDto);
+                break;
+            default: throw new ObjectNotFoundException("Unknown access");
+        }
+        event.setLocation(location);
+
+    }
+
+    private Location updateEventLocationAdmin(Event event, EventUpdateDto eventUpdateDto){
+        Long usages = eventRepository.countLocationUsages(event.getLocation().getId(), event.getId()).getCountId();
+        Location location;
+        if (usages == 0) {
+            location = locationService.updateLocation(eventUpdateDto.getLocation());
+        } else {
+            location = locationService.addLocationAdmin(eventUpdateDto.getLocation());
+        }
+        return location;
+    }
+
+    private Location updateEventLocationPrivate(Event event, EventUpdateDto eventUpdateDto){
+        Long usages = eventRepository.countLocationUsages(event.getLocation().getId(), event.getId()).getCountId();
+        Location location;
+        boolean isCreator = event.getLocation().getCreator().getId().equals(eventUpdateDto.getUserId());
+        if(isCreator && usages == 0){
+            location = locationService.updateLocation(eventUpdateDto.getLocation());
+        }else {
+            location = locationService.addLocationPrivate(eventUpdateDto.getLocation(),event.getInitiator());
+        }
+        return location;
+    }
+
+
+
     private void updateEventStateAdmin(Event event, State state) {
         switch (state) {
             case PUBLISH_EVENT:
@@ -289,6 +337,7 @@ public class EventServiceImp implements EventService {
             case REJECT_EVENT:
                 event.setState(State.CANCELED);
                 break;
+            default: throw new ObjectNotFoundException("Unknown action");
         }
     }
 
@@ -300,17 +349,31 @@ public class EventServiceImp implements EventService {
             case CANCEL_REVIEW:
                 event.setState(State.CANCELED);
                 break;
+            default: throw new ObjectNotFoundException("Unknown action");
         }
     }
 
     private Event makeEvent(EventInputDto eventInputDto, User initiator, Category category) {
-        Event event = eventMapper.convertToCategory(eventInputDto);
+        Event event = eventMapper.convertToEvent(eventInputDto);
         event.setConfirmedRequests(0);
         event.setCreatedOn(ZonedDateTime.now(ZoneId.systemDefault()));
         event.setInitiator(initiator);
         event.setState(State.PENDING);
         event.setViews(0);
         event.setCategory(category);
+        Location location;
+        if (eventInputDto.getLocation().getId() != null) {
+            location = locationRepository.findById(eventInputDto.getLocation().getId()).orElseThrow(
+                    () -> new ObjectNotFoundException("Location not found")
+            );
+            if(eventRepository.countStateLocationUsages(eventInputDto.getLocation().getId(),
+                    State.PUBLISHED.toString()).getCountId()==0){
+                throw new ObjectNotFoundException("Location not found");
+            }
+        } else {
+            location = locationService.addLocationPrivate(eventInputDto.getLocation(), initiator);
+        }
+        event.setLocation(location);
         return event;
     }
 }

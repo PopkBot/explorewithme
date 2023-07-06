@@ -6,6 +6,7 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class BaseClient {
@@ -73,7 +74,8 @@ public class BaseClient {
         return makeAndSendRequest(HttpMethod.DELETE, path, parameters, null);
     }
 
-    private <T> ResponseEntity<Object> makeAndSendRequest(HttpMethod method, String path, @Nullable Map<String, Object> parameters, @Nullable T body) {
+    private <T> ResponseEntity<Object> makeAndSendRequest(HttpMethod method, String path, @Nullable Map<String,
+            Object> parameters, @Nullable T body ) {
         HttpEntity<T> requestEntity = new HttpEntity<>(body, defaultHeaders());
 
         ResponseEntity<Object> shareitServerResponse;
@@ -93,6 +95,7 @@ public class BaseClient {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        headers.setAcceptLanguage(Locale.LanguageRange.parse("en"));
         return headers;
     }
 }

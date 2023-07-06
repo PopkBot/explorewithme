@@ -4,7 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import main.event.model.Location;
+import main.location.dto.LocationInputDto;
+import main.location.model.Location;
 
 
 @Data
@@ -16,7 +17,7 @@ public class EventInputDto {
     private Long category;
     private String description;
     private String eventDate;
-    private Location location;
+    private LocationInputDto location;
     private Boolean paid = false;
     private Integer participantLimit = 0;
     private Boolean requestModeration = true;

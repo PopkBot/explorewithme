@@ -18,6 +18,10 @@ import main.event.dto.EventUpdateDto;
 import main.event.dto.GetEventsParamsDto;
 import main.event.service.EventService;
 import main.event.validator.EventUpdate;
+import main.location.dto.LocationDto;
+import main.location.dto.LocationInputDto;
+import main.location.service.LocationService;
+import main.location.validator.LocationCreate;
 import main.user.dto.GetUserListParamsDto;
 import main.user.dto.UserDto;
 import main.user.dto.UserInputDto;
@@ -40,6 +44,7 @@ public class AdminUser {
     private final CategoryService categoryService;
     private final EventService eventService;
     private final CompilationService compilationService;
+    private final LocationService locationService;
 
     @GetMapping("/users")
     @ResponseStatus(HttpStatus.OK)
@@ -142,6 +147,14 @@ public class AdminUser {
                                            @PathVariable Long compId) {
         log.info("Request for compilation patching {}", dto);
         return compilationService.patchCompilation(compId, dto);
+    }
+
+    @PostMapping("/locations")
+    @ResponseStatus(HttpStatus.CREATED)
+    public LocationDto addLocation(@LocationCreate @RequestBody LocationInputDto locationInputDto){
+        log.info("Request from admin for location adding {}",locationInputDto);
+        return locationService.addLocationFromController(locationInputDto);
+
     }
 
 }
