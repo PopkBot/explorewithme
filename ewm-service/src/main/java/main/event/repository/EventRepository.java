@@ -22,7 +22,13 @@ public interface EventRepository extends JpaRepository<Event, Long>, QuerydslPre
             "id<>?2")
     EventCountProjection countLocationUsages(Long locationId, Long eventId);
 
+    @Query(nativeQuery = true, value = "SELECT COUNT(id) AS countId FROM events WHERE location_id = ?1")
+    EventCountProjection countLocationUsages(Long locationId);
+
     @Query(nativeQuery = true, value = "SELECT COUNT(id) AS countId FROM events WHERE location_id = ?1 AND "+
-            "state = ?2")
-    EventCountProjection countStateLocationUsages(Long locationId, String state);
+            "( state = ?2 OR initiator_id = ?3)")
+    EventCountProjection countStateLocationUsages(Long locationId, String state, Long initiatorId);
+
+
+
 }

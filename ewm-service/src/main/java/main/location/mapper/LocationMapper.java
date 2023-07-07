@@ -43,6 +43,9 @@ public class LocationMapper {
         LinkedHashMap<String,Object> body = (LinkedHashMap<String,Object>) entity.getBody();
         Object bodyAddress = body.get("address");
         LinkedHashMap<String,String> locBody = (LinkedHashMap<String,String>)bodyAddress;
+        if(locBody== null){
+            return new LocationDto();
+        }
         return LocationDto.builder()
                 .city(locBody.get("city"))
                 .country(locBody.get("country"))

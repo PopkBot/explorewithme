@@ -5,6 +5,7 @@ import com.querydsl.core.types.Path;
 import com.querydsl.core.types.PathMetadata;
 import com.querydsl.core.types.dsl.*;
 import main.event.State;
+import main.location.model.Location;
 
 import java.time.ZonedDateTime;
 
@@ -16,6 +17,8 @@ public class QEvent extends EntityPathBase<Event> {
     public static final QEvent event = new QEvent("event");
 
     public final NumberPath<Long> initiator = createNumber("initiator.id", Long.class);
+
+    public final NumberPath<Long> location = createNumber("location.id", Long.class);
 
     public final EnumPath<State> state = createEnum("state", State.class);
 

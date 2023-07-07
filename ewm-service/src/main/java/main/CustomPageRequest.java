@@ -1,26 +1,65 @@
 package main;
 
-import org.springframework.data.domain.PageRequest;
+import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-public class CustomPageRequest extends PageRequest {
-    /**
-     * Creates a new {@link PageRequest} with sort parameters applied.
-     *
-     * @param page zero-based page index, must not be negative.
-     * @param size the size of the page to be returned, must be greater than 0.
-     * @param sort must not be {@literal null}, use {@link Sort#unsorted()} instead.
-     */
-    public CustomPageRequest(int page, int size, Sort sort) {
-        super(page, size, sort);
-    }
+@AllArgsConstructor
+public class CustomPageRequest implements Pageable {
 
-    public CustomPageRequest(int page, int size) {
-        super(page, size, Sort.unsorted());
+    private int offset;
+    private int limit;
+    private Sort sort;
+
+    public CustomPageRequest(int offset, int limit) {
+        this.offset = offset;
+        this.limit = limit;
+        this.sort = Sort.unsorted();
     }
 
     @Override
     public int getPageNumber() {
-        return (int) (getOffset() / getPageSize());
+        return offset / limit;
+    }
+
+    @Override
+    public int getPageSize() {
+        return limit;
+    }
+
+    @Override
+    public long getOffset() {
+        return offset;
+    }
+
+    @Override
+    public Sort getSort() {
+        return sort;
+    }
+
+    @Override
+    public Pageable next() {
+        return new CustomPageRequest(getPageSize(), (int) (getOffset() + getPageSize()));
+    }
+
+    @Override
+    public Pageable previousOrFirst() {
+        return hasPrevious() ?
+                new CustomPageRequest(getPageSize(), (int) (getOffset() - getPageSize())) : this;
+    }
+
+    @Override
+    public Pageable first() {
+        return new CustomPageRequest(getPageSize(), 0);
+    }
+
+    @Override
+    public Pageable withPage(int pageNumber) {
+        return new CustomPageRequest(pageNumber, this.getPageSize(), this.getSort());
+    }
+
+    @Override
+    public boolean hasPrevious() {
+        return offset > limit;
     }
 }

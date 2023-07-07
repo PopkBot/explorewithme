@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import main.event.SortType;
 import main.exceptions.ValidationException;
+import main.location.dto.LocationGetParamsDto;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -30,6 +31,7 @@ public class GetEventsParamsDto {
     private Boolean paid;
     private Boolean onlyAvailable;
     private SortType sort;
+    private LocationGetParamsDto locationGetParamsDto;
 
     public void validate() {
         if (this.getRangeEnd() != null && this.getRangeStart() != null) {
@@ -41,6 +43,7 @@ public class GetEventsParamsDto {
                 throw new ValidationException("End date cannot be before start");
             }
         }
+        locationGetParamsDto.validate();
     }
 
 }

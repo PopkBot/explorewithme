@@ -19,9 +19,11 @@ import main.event.dto.GetEventsParamsDto;
 import main.event.service.EventService;
 import main.event.validator.EventUpdate;
 import main.location.dto.LocationDto;
+import main.location.dto.LocationGetParamsDto;
 import main.location.dto.LocationInputDto;
 import main.location.service.LocationService;
 import main.location.validator.LocationCreate;
+import main.location.validator.LocationUpdate;
 import main.user.dto.GetUserListParamsDto;
 import main.user.dto.UserDto;
 import main.user.dto.UserInputDto;
@@ -104,7 +106,13 @@ public class AdminUser {
                                     @RequestParam(required = false) String rangeStart,
                                     @RequestParam(required = false) String rangeEnd,
                                     @RequestParam(defaultValue = "0") Integer from,
-                                    @RequestParam(defaultValue = "10") Integer size) {
+                                    @RequestParam(defaultValue = "10") Integer size,
+                                    @RequestParam(required = false) Double lat,
+                                    @RequestParam(required = false) Double lon,
+                                    @RequestParam(required = false) Integer radius,
+                                    @RequestParam(required = false) String country,
+                                    @RequestParam(required = false) String city,
+                                    @RequestParam(required = false) String place) {
         GetEventsParamsDto paramsDto = GetEventsParamsDto.builder()
                 .users(users)
                 .states(states)
@@ -113,6 +121,16 @@ public class AdminUser {
                 .rangeEnd(rangeEnd)
                 .from(from)
                 .size(size)
+                .locationGetParamsDto(
+                        LocationGetParamsDto.builder()
+                        .lon(lon)
+                        .lat(lat)
+                        .country(country)
+                        .city(city)
+                        .place(place)
+                        .radius(radius)
+                        .access(Access.ADMIN)
+                        .build())
                 .build();
         log.info("Request for events {}", paramsDto.toString());
         return eventService.getEvents(paramsDto);
@@ -156,5 +174,56 @@ public class AdminUser {
         return locationService.addLocationFromController(locationInputDto);
 
     }
+
+    @PatchMapping("/locations/{locationId}")
+    @ResponseStatus(HttpStatus.OK)
+    public LocationDto updateLocation(@LocationUpdate @RequestBody LocationInputDto locationInputDto,
+                                      @PathVariable Long locationId){
+        locationInputDto.setId(locationId);
+        log.info("Request from admin for location update {}",locationInputDto);
+        return locationService.updateLocationFromController(locationInputDto);
+    }
+
+    @DeleteMapping("/locations/{locationId}")
+    @ResponseStatus(HttpStatus.OK)
+    public LocationDto deleteLocationByID(@PathVariable Long locationId){
+        log.info("Request for location deleting {}",locationId);
+        return locationService.deleteLocationById(locationId);
+    }
+
+    @DeleteMapping("/locations")
+    @ResponseStatus(HttpStatus.OK)
+    public List<LocationDto> deleteUnusedLocations(){
+        log.info("Request for unused locations deleting");
+        return locationService.deleteUnusedLocations();
+    }
+
+    @GetMapping("/locations")
+    @ResponseStatus(HttpStatus.OK)
+    public List<LocationDto> getLocations(@RequestParam(required = false) Double lat,
+                                          @RequestParam(required = false) Double lon,
+                                          @RequestParam(required = false) Integer radius,
+                                          @RequestParam(required = false) String country,
+                                          @RequestParam(required = false) String city,
+                                          @RequestParam(required = false) String place,
+                                          @RequestParam(defaultValue = "0") Integer from,
+                                          @RequestParam(defaultValue = "10") Integer size){
+        LocationGetParamsDto dto = LocationGetParamsDto.builder()
+                .lon(lon)
+                .lat(lat)
+                .country(country)
+                .city(city)
+                .place(place)
+                .radius(radius)
+                .from(from)
+                .size(size)
+                .access(Access.ADMIN)
+                .build();
+        log.info("Request for locations");
+        return locationService.getLocations(dto);
+    }
+
+
+
 
 }
