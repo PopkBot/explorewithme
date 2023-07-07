@@ -1,9 +1,15 @@
 package main.location.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import main.access.Access;
 
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class LocationInputDto {
 
     private Long id;

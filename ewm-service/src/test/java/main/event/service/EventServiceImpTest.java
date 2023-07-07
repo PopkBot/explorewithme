@@ -13,6 +13,8 @@ import main.event.dto.EventDto;
 import main.event.dto.EventInputDto;
 import main.event.dto.EventUpdateDto;
 import main.event.dto.GetEventsParamsDto;
+import main.location.dto.LocationDto;
+import main.location.dto.LocationInputDto;
 import main.location.model.Location;
 import main.event.service.container.config.ContainersEnvironment;
 import main.exceptions.ConflictException;
@@ -47,7 +49,7 @@ class EventServiceImpTest extends ContainersEnvironment {
     private UserService userService;
     @Autowired
     private CategoryService categoryService;
-/*
+
     @Test
     void testCreateEvent() {
 
@@ -67,9 +69,11 @@ class EventServiceImpTest extends ContainersEnvironment {
                 .title("event")
                 .paid(true)
                 .location(
-                        Location.builder()
-                                .lat(1.0)
-                                .lon(2.0)
+                        LocationInputDto.builder()
+                                .lat(Math.random())
+                                .lon(Math.random())
+                                .place("place")
+                                .radius((int) Math.random()+1)
                                 .build())
                 .description("descr")
                 .annotation("ann")
@@ -137,9 +141,11 @@ class EventServiceImpTest extends ContainersEnvironment {
                 .title("event1")
                 .paid(true)
                 .location(
-                        Location.builder()
-                                .lat(1.0f)
-                                .lon(2.0f)
+                        LocationInputDto.builder()
+                                .lat(Math.random())
+                                .lon(Math.random())
+                                .place("place")
+                                .radius((int) Math.random()+1)
                                 .build())
                 .description("descr")
                 .annotation("ann")
@@ -152,9 +158,11 @@ class EventServiceImpTest extends ContainersEnvironment {
                 .title("event2")
                 .paid(true)
                 .location(
-                        Location.builder()
-                                .lat(1.0f)
-                                .lon(2.0f)
+                        LocationInputDto.builder()
+                                .lat(Math.random())
+                                .lon(Math.random())
+                                .place("place")
+                                .radius((int) Math.random()+1)
                                 .build())
                 .description("descr")
                 .annotation("ann")
@@ -167,9 +175,11 @@ class EventServiceImpTest extends ContainersEnvironment {
                 .title("event3")
                 .paid(true)
                 .location(
-                        Location.builder()
-                                .lat(1.0f)
-                                .lon(2.0f)
+                        LocationInputDto.builder()
+                                .lat(Math.random())
+                                .lon(Math.random())
+                                .place("place")
+                                .radius((int) Math.random()+1)
                                 .build())
                 .description("descr")
                 .annotation("ann")
@@ -222,9 +232,11 @@ class EventServiceImpTest extends ContainersEnvironment {
                 .title("event1")
                 .paid(true)
                 .location(
-                        Location.builder()
-                                .lat(1.0f)
-                                .lon(2.0f)
+                        LocationInputDto.builder()
+                                .lat(Math.random())
+                                .lon(Math.random())
+                                .place("place")
+                                .radius((int) Math.random()+1)
                                 .build())
                 .description("descr")
                 .annotation("ann")
@@ -237,9 +249,11 @@ class EventServiceImpTest extends ContainersEnvironment {
                 .title("event2")
                 .paid(true)
                 .location(
-                        Location.builder()
-                                .lat(1.0f)
-                                .lon(2.0f)
+                        LocationInputDto.builder()
+                                .lat(Math.random())
+                                .lon(Math.random())
+                                .place("place")
+                                .radius((int) Math.random()+1)
                                 .build())
                 .description("descr")
                 .annotation("ann")
@@ -252,9 +266,11 @@ class EventServiceImpTest extends ContainersEnvironment {
                 .title("event3")
                 .paid(true)
                 .location(
-                        Location.builder()
-                                .lat(1.0f)
-                                .lon(2.0f)
+                        LocationInputDto.builder()
+                                .lat(Math.random())
+                                .lon(Math.random())
+                                .place("place")
+                                .radius((int) Math.random()+1)
                                 .build())
                 .description("descr")
                 .annotation("ann")
@@ -366,9 +382,11 @@ class EventServiceImpTest extends ContainersEnvironment {
                 .title("event1")
                 .paid(true)
                 .location(
-                        Location.builder()
-                                .lat(1.0f)
-                                .lon(2.0f)
+                        LocationInputDto.builder()
+                                .lat(Math.random())
+                                .lon(Math.random())
+                                .place("place")
+                                .radius((int) Math.random()+1)
                                 .build())
                 .description("descr")
                 .annotation("ann")
@@ -399,6 +417,12 @@ class EventServiceImpTest extends ContainersEnvironment {
         Assertions.assertEquals("Cannot change event less then 1 hour before event date", ve.getMessage());
 
         eventInputDto1.setEventDate(LocalDateTime.now().plusHours(10).format(FormatConstants.DATE_TIME_FORMATTER));
+        eventInputDto1.setLocation(LocationInputDto.builder()
+                .lat(1.0)
+                .lon(2.0)
+                .place("place2")
+                .radius(1)
+                .build());
         eventDto1 = eventService.createEvent(eventInputDto1, userDto1.getId());
         Assertions.assertEquals(userDto1.getId(), eventDto1.getInitiator().getId());
         Assertions.assertEquals(State.PENDING.name(), eventDto1.getState());
@@ -413,7 +437,14 @@ class EventServiceImpTest extends ContainersEnvironment {
                 .annotation("new Ann")
                 .requestModeration(true)
                 .description("new descr")
-                .location(Location.builder().lon(-1f).lat(-2f).build())
+                .location(
+                        LocationInputDto.builder()
+                                .lat(1.0)
+                                .lon(2.0)
+                                .place("place2")
+                                .radius(1)
+                                .build()
+                )
                 .participantLimit(10)
                 .build();
         EventDto updatedEventDto = eventService.updateEvent(eventDto1.getId(), eventUpdateDto);
@@ -423,7 +454,7 @@ class EventServiceImpTest extends ContainersEnvironment {
         Assertions.assertTrue(updatedEventDto.getRequestModeration());
         Assertions.assertFalse(updatedEventDto.getPaid());
         Assertions.assertEquals(newEventDate, updatedEventDto.getEventDate().format(FormatConstants.DATE_TIME_FORMATTER));
-        Assertions.assertEquals(Location.builder().lon(-1f).lat(-2f).build(), updatedEventDto.getLocation());
+        Assertions.assertEquals("place2", updatedEventDto.getLocation().getPlace());
         Assertions.assertEquals(10, updatedEventDto.getParticipantLimit());
 
         eventUpdateDto = EventUpdateDto.builder()
@@ -442,6 +473,7 @@ class EventServiceImpTest extends ContainersEnvironment {
                 () -> eventService.updateEvent(finalEventDto1.getId(), finalEventUpdateDto2));
         Assertions.assertEquals("Cannot change published event", ce.getMessage());
 
+        eventInputDto1.getLocation().setPlace("new place");
         EventDto eventDto2 = eventService.createEvent(eventInputDto1, userDto1.getId());
         eventUpdateDto.setStateAction(State.REJECT_EVENT);
         updatedEventDto = eventService.updateEvent(eventDto2.getId(), eventUpdateDto);
@@ -483,9 +515,11 @@ class EventServiceImpTest extends ContainersEnvironment {
                 .title("event1")
                 .paid(true)
                 .location(
-                        Location.builder()
-                                .lat(1.0f)
-                                .lon(2.0f)
+                        LocationInputDto.builder()
+                                .lat(1.0)
+                                .lon(2.0)
+                                .place("place2")
+                                .radius(1)
                                 .build())
                 .description("descr")
                 .annotation("ann")
@@ -529,7 +563,12 @@ class EventServiceImpTest extends ContainersEnvironment {
                 .annotation("new Ann")
                 .requestModeration(true)
                 .description("new descr")
-                .location(Location.builder().lon(-1f).lat(-2f).build())
+                .location(LocationInputDto.builder()
+                        .lat(1.0)
+                        .lon(2.0)
+                        .place("place2")
+                        .radius(1)
+                        .build())
                 .participantLimit(10)
                 .build();
         EventDto updatedEventDto = eventService.updateEvent(eventDto1.getId(), eventUpdateDto);
@@ -539,7 +578,7 @@ class EventServiceImpTest extends ContainersEnvironment {
         Assertions.assertTrue(updatedEventDto.getRequestModeration());
         Assertions.assertFalse(updatedEventDto.getPaid());
         Assertions.assertEquals(newEventDate, updatedEventDto.getEventDate().format(FormatConstants.DATE_TIME_FORMATTER));
-        Assertions.assertEquals(Location.builder().lon(-1f).lat(-2f).build(), updatedEventDto.getLocation());
+        Assertions.assertEquals("place2", updatedEventDto.getLocation().getPlace());
         Assertions.assertEquals(10, updatedEventDto.getParticipantLimit());
 
         EventUpdateDto finalEventUpdateDto3 = eventUpdateDto;
@@ -547,6 +586,7 @@ class EventServiceImpTest extends ContainersEnvironment {
                 () -> eventService.updateEvent(eventDto1.getId(), finalEventUpdateDto3));
         Assertions.assertEquals("Cannot change event less then 2 hour before event date", ve.getMessage());
 
+        eventInputDto1.getLocation().setPlace("new place");
         EventDto eventDto2 = eventService.createEvent(eventInputDto1, userDto1.getId());
         EventUpdateDto publishEvent = EventUpdateDto.builder()
                 .access(Access.ADMIN)
@@ -558,6 +598,7 @@ class EventServiceImpTest extends ContainersEnvironment {
                 () -> eventService.updateEvent(eventDto2.getId(), finalEventUpdateDto4));
         Assertions.assertEquals("Cannot change published event", ce.getMessage());
 
+        eventInputDto1.getLocation().setPlace("new place2");
         EventDto eventDto3 = eventService.createEvent(eventInputDto1, userDto1.getId());
         EventUpdateDto cancelEvent = EventUpdateDto.builder()
                 .userId(userDto1.getId())
@@ -604,9 +645,11 @@ class EventServiceImpTest extends ContainersEnvironment {
                 .title("event1")
                 .paid(true)
                 .location(
-                        Location.builder()
-                                .lat(1.0f)
-                                .lon(2.0f)
+                        LocationInputDto.builder()
+                                .lat(1.0)
+                                .lon(2.0)
+                                .place("place2")
+                                .radius(1)
                                 .build())
                 .description("descr")
                 .annotation("ann")
@@ -637,14 +680,4 @@ class EventServiceImpTest extends ContainersEnvironment {
     }
 
 
-    @Test
-    void testGetEventByIdPublic() {
-
-    }
-
-    @Test
-    void testGetEventsPublic() {
-
-    }
-*/
 }
