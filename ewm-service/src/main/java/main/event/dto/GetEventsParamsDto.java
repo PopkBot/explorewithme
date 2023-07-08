@@ -43,7 +43,7 @@ public class GetEventsParamsDto {
                 throw new ValidationException("End date cannot be before start");
             }
         }
-        if(locationGetParamsDto!=null){
+        if (locationGetParamsDto != null) {
             locationGetParamsDto.validate();
         }
     }

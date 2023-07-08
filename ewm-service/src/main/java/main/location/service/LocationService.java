@@ -20,16 +20,15 @@ public interface LocationService {
 
     List<LocationDto> getLocations(LocationGetParamsDto dto);
 
-    List<LocationDto> getPublishedLocations();
+    LocationDto getLocationById(Long id);
+
+    LocationDto getLocationByIdPublic(Long id);
 
     Location addLocationAdmin(LocationInputDto locationInputDto);
 
     Location addLocationPrivate(LocationInputDto locationInputDto, User creator);
 
     Location updateLocation(LocationInputDto locationInputDto);
-
-
-
 
 
 }

@@ -24,7 +24,7 @@ public class LocationClient extends BaseClient {
                 .build());
     }
 
-    public ResponseEntity<Object> getCountryAndCityByCoords(Double lon, Double lat){
+    public ResponseEntity<Object> getCountryAndCityByCoords(Double lon, Double lat) {
         Map<String, Object> params = Map.of(
                 "lon", lon,
                 "lat", lat,

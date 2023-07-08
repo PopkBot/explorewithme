@@ -1,14 +1,11 @@
 package main.event.model;
 
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.*;
 import main.category.model.Category;
 import main.compilation.model.Compilation;
 import main.event.State;
 import main.location.model.Location;
 import main.user.model.User;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.*;
 import java.time.ZonedDateTime;

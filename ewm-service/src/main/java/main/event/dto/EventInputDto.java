@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import main.location.dto.LocationInputDto;
-import main.location.model.Location;
 
 
 @Data

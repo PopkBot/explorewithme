@@ -123,14 +123,14 @@ public class AdminUser {
                 .size(size)
                 .locationGetParamsDto(
                         LocationGetParamsDto.builder()
-                        .lon(lon)
-                        .lat(lat)
-                        .country(country)
-                        .city(city)
-                        .place(place)
-                        .radius(radius)
-                        .access(Access.ADMIN)
-                        .build())
+                                .lon(lon)
+                                .lat(lat)
+                                .country(country)
+                                .city(city)
+                                .place(place)
+                                .radius(radius)
+                                .access(Access.ADMIN)
+                                .build())
                 .build();
         log.info("Request for events {}", paramsDto.toString());
         return eventService.getEvents(paramsDto);
@@ -169,8 +169,8 @@ public class AdminUser {
 
     @PostMapping("/locations")
     @ResponseStatus(HttpStatus.CREATED)
-    public LocationDto addLocation(@LocationCreate @RequestBody LocationInputDto locationInputDto){
-        log.info("Request from admin for location adding {}",locationInputDto);
+    public LocationDto addLocation(@LocationCreate @RequestBody LocationInputDto locationInputDto) {
+        log.info("Request from admin for location adding {}", locationInputDto);
         return locationService.addLocationFromController(locationInputDto);
 
     }
@@ -178,22 +178,22 @@ public class AdminUser {
     @PatchMapping("/locations/{locationId}")
     @ResponseStatus(HttpStatus.OK)
     public LocationDto updateLocation(@LocationUpdate @RequestBody LocationInputDto locationInputDto,
-                                      @PathVariable Long locationId){
+                                      @PathVariable Long locationId) {
         locationInputDto.setId(locationId);
-        log.info("Request from admin for location update {}",locationInputDto);
+        log.info("Request from admin for location update {}", locationInputDto);
         return locationService.updateLocationFromController(locationInputDto);
     }
 
     @DeleteMapping("/locations/{locationId}")
     @ResponseStatus(HttpStatus.OK)
-    public LocationDto deleteLocationByID(@PathVariable Long locationId){
-        log.info("Request for location deleting {}",locationId);
+    public LocationDto deleteLocationByID(@PathVariable Long locationId) {
+        log.info("Request for location deleting {}", locationId);
         return locationService.deleteLocationById(locationId);
     }
 
     @DeleteMapping("/locations")
     @ResponseStatus(HttpStatus.OK)
-    public List<LocationDto> deleteUnusedLocations(){
+    public List<LocationDto> deleteUnusedLocations() {
         log.info("Request for unused locations deleting");
         return locationService.deleteUnusedLocations();
     }
@@ -207,7 +207,7 @@ public class AdminUser {
                                           @RequestParam(required = false) String city,
                                           @RequestParam(required = false) String place,
                                           @RequestParam(defaultValue = "0") Integer from,
-                                          @RequestParam(defaultValue = "10") Integer size){
+                                          @RequestParam(defaultValue = "10") Integer size) {
         LocationGetParamsDto dto = LocationGetParamsDto.builder()
                 .lon(lon)
                 .lat(lat)
@@ -223,7 +223,12 @@ public class AdminUser {
         return locationService.getLocations(dto);
     }
 
-
+    @GetMapping("/locations/{locationId}")
+    @ResponseStatus(HttpStatus.OK)
+    public LocationDto getLocationById(@PathVariable Long locationId) {
+        log.info("Request for location {}", locationId);
+        return locationService.getLocationById(locationId);
+    }
 
 
 }

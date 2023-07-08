@@ -13,13 +13,11 @@ import main.event.dto.EventDto;
 import main.event.dto.EventInputDto;
 import main.event.dto.EventUpdateDto;
 import main.event.dto.GetEventsParamsDto;
-import main.location.dto.LocationDto;
-import main.location.dto.LocationInputDto;
-import main.location.model.Location;
 import main.event.service.container.config.ContainersEnvironment;
 import main.exceptions.ConflictException;
 import main.exceptions.ObjectNotFoundException;
 import main.exceptions.ValidationException;
+import main.location.dto.LocationInputDto;
 import main.user.dto.UserDto;
 import main.user.dto.UserInputDto;
 import main.user.service.UserService;
@@ -73,7 +71,7 @@ class EventServiceImpTest extends ContainersEnvironment {
                                 .lat(Math.random())
                                 .lon(Math.random())
                                 .place("place")
-                                .radius((int) Math.random()+1)
+                                .radius((int) Math.random() + 1)
                                 .build())
                 .description("descr")
                 .annotation("ann")
@@ -145,7 +143,7 @@ class EventServiceImpTest extends ContainersEnvironment {
                                 .lat(Math.random())
                                 .lon(Math.random())
                                 .place("place")
-                                .radius((int) Math.random()+1)
+                                .radius((int) Math.random() + 1)
                                 .build())
                 .description("descr")
                 .annotation("ann")
@@ -162,7 +160,7 @@ class EventServiceImpTest extends ContainersEnvironment {
                                 .lat(Math.random())
                                 .lon(Math.random())
                                 .place("place")
-                                .radius((int) Math.random()+1)
+                                .radius((int) Math.random() + 1)
                                 .build())
                 .description("descr")
                 .annotation("ann")
@@ -179,7 +177,7 @@ class EventServiceImpTest extends ContainersEnvironment {
                                 .lat(Math.random())
                                 .lon(Math.random())
                                 .place("place")
-                                .radius((int) Math.random()+1)
+                                .radius((int) Math.random() + 1)
                                 .build())
                 .description("descr")
                 .annotation("ann")
@@ -236,7 +234,7 @@ class EventServiceImpTest extends ContainersEnvironment {
                                 .lat(Math.random())
                                 .lon(Math.random())
                                 .place("place")
-                                .radius((int) Math.random()+1)
+                                .radius((int) Math.random() + 1)
                                 .build())
                 .description("descr")
                 .annotation("ann")
@@ -253,7 +251,7 @@ class EventServiceImpTest extends ContainersEnvironment {
                                 .lat(Math.random())
                                 .lon(Math.random())
                                 .place("place")
-                                .radius((int) Math.random()+1)
+                                .radius((int) Math.random() + 1)
                                 .build())
                 .description("descr")
                 .annotation("ann")
@@ -270,7 +268,7 @@ class EventServiceImpTest extends ContainersEnvironment {
                                 .lat(Math.random())
                                 .lon(Math.random())
                                 .place("place")
-                                .radius((int) Math.random()+1)
+                                .radius((int) Math.random() + 1)
                                 .build())
                 .description("descr")
                 .annotation("ann")
@@ -386,7 +384,7 @@ class EventServiceImpTest extends ContainersEnvironment {
                                 .lat(Math.random())
                                 .lon(Math.random())
                                 .place("place")
-                                .radius((int) Math.random()+1)
+                                .radius((int) Math.random() + 1)
                                 .build())
                 .description("descr")
                 .annotation("ann")

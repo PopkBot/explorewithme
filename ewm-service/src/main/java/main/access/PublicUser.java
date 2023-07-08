@@ -149,7 +149,7 @@ public class PublicUser {
                                           @RequestParam(required = false) String place,
                                           @RequestParam(defaultValue = "0") Integer from,
                                           @RequestParam(defaultValue = "10") Integer size
-                                          ) {
+    ) {
         LocationGetParamsDto dto = LocationGetParamsDto.builder()
                 .lon(lon)
                 .lat(lat)
@@ -163,6 +163,13 @@ public class PublicUser {
                 .build();
         log.info("Request for locations");
         return locationService.getLocations(dto);
+    }
+
+    @GetMapping("/locations/{locationId}")
+    @ResponseStatus(HttpStatus.OK)
+    public LocationDto getLocationById(@PathVariable Long locationId) {
+        log.info("Request for location {}", locationId);
+        return locationService.getLocationByIdPublic(locationId);
     }
 
 }

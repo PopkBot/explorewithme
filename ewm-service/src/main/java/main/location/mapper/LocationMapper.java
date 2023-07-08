@@ -39,11 +39,11 @@ public class LocationMapper {
         return modelMapper.map(location, LocationDto.class);
     }
 
-    public LocationDto convertResponseEntityToDto(ResponseEntity<Object> entity){
-        LinkedHashMap<String,Object> body = (LinkedHashMap<String,Object>) entity.getBody();
+    public LocationDto convertResponseEntityToDto(ResponseEntity<Object> entity) {
+        LinkedHashMap<String, Object> body = (LinkedHashMap<String, Object>) entity.getBody();
         Object bodyAddress = body.get("address");
-        LinkedHashMap<String,String> locBody = (LinkedHashMap<String,String>)bodyAddress;
-        if(locBody== null){
+        LinkedHashMap<String, String> locBody = (LinkedHashMap<String, String>) bodyAddress;
+        if (locBody == null) {
             return new LocationDto();
         }
         return LocationDto.builder()

@@ -105,7 +105,7 @@ public class EventServiceImp implements EventService {
                     .atZone(ZoneId.systemDefault());
             query = query.and(QEvent.event.eventDate.between(start, end));
         }
-        if(paramsDto.getLocationGetParamsDto()!=null) {
+        if (paramsDto.getLocationGetParamsDto() != null) {
             BooleanExpression locationQuery = locationQuery(paramsDto.getLocationGetParamsDto());
             if (!locationQuery.equals(QLocation.location.isNotNull())) {
                 JPQLQuery<Long> subQuery = JPAExpressions.select(QLocation.location.id).
@@ -124,17 +124,16 @@ public class EventServiceImp implements EventService {
     }
 
 
-
-    private BooleanExpression locationQuery(LocationGetParamsDto dto){
+    private BooleanExpression locationQuery(LocationGetParamsDto dto) {
 
         BooleanExpression query = QLocation.location.isNotNull();
 
-        if(dto.getLon()!=null && dto.getLat()!=null && dto.getRadius()!=null){
-            Double toRads = Math.PI/180.0;
-            NumberPath<Double> latP = Expressions.numberPath(Double.class,String.valueOf(dto.getLat()*toRads));
-            NumberPath<Double> lonP = Expressions.numberPath(Double.class,String.valueOf(dto.getLon()*toRads));
-            NumberPath<Double> radP = Expressions.numberPath(Double.class,dto.getRadius().toString());
-            NumberPath<Double> earthRadius = Expressions.numberPath(Double.class,String.valueOf(6372795.0));
+        if (dto.getLon() != null && dto.getLat() != null && dto.getRadius() != null) {
+            Double toRads = Math.PI / 180.0;
+            NumberPath<Double> latP = Expressions.numberPath(Double.class, String.valueOf(dto.getLat() * toRads));
+            NumberPath<Double> lonP = Expressions.numberPath(Double.class, String.valueOf(dto.getLon() * toRads));
+            NumberPath<Double> radP = Expressions.numberPath(Double.class, dto.getRadius().toString());
+            NumberPath<Double> earthRadius = Expressions.numberPath(Double.class, String.valueOf(6372795.0));
 
             NumberExpression<Double> sin1Sin2 = MathExpressions.sin(latP)
                     .multiply(MathExpressions.sin(QLocation.location.lat.multiply(toRads)));
@@ -147,13 +146,13 @@ public class EventServiceImp implements EventService {
             query = query.and(QLocation.location.radius.add(radP).gt(distance));
         }
 
-        if(dto.getCity()!=null){
+        if (dto.getCity() != null) {
             query = query.and(QLocation.location.city.containsIgnoreCase(dto.getCity()));
         }
-        if(dto.getCountry()!=null){
+        if (dto.getCountry() != null) {
             query = query.and(QLocation.location.country.containsIgnoreCase(dto.getCountry()));
         }
-        if(dto.getPlace()!=null){
+        if (dto.getPlace() != null) {
             query = query.and(QLocation.location.place.containsIgnoreCase(dto.getPlace()));
         }
         return query;
@@ -173,14 +172,13 @@ public class EventServiceImp implements EventService {
             case PRIVATE:
                 updateEventPrivate(event, eventUpdateDto);
                 break;
-            default: throw new ObjectNotFoundException("Unknown access");
+            default:
+                throw new ObjectNotFoundException("Unknown access");
         }
         event = eventRepository.save(event);
         log.info("Event has been updated {}", event);
         return eventMapper.convertToDto(event);
     }
-
-
 
 
     @Override
@@ -244,7 +242,7 @@ public class EventServiceImp implements EventService {
         if (paramsDto.getOnlyAvailable() != null && paramsDto.getOnlyAvailable()) {
             query = query.and(QEvent.event.participantLimit.gt(QEvent.event.confirmedRequests));
         }
-        if(paramsDto.getLocationGetParamsDto()!=null) {
+        if (paramsDto.getLocationGetParamsDto() != null) {
             BooleanExpression locationQuery = locationQuery(paramsDto.getLocationGetParamsDto());
             if (!locationQuery.equals(QLocation.location.isNotNull())) {
                 JPQLQuery<Long> subQuery = JPAExpressions.select(QLocation.location.id).
@@ -332,7 +330,7 @@ public class EventServiceImp implements EventService {
             event.setEventDate(date);
         }
         if (eventUpdateDto.getLocation() != null) {
-            updateEventLocation(event,eventUpdateDto);
+            updateEventLocation(event, eventUpdateDto);
         }
         if (eventUpdateDto.getPaid() != null) {
             event.setPaid(eventUpdateDto.getPaid());
@@ -353,21 +351,22 @@ public class EventServiceImp implements EventService {
         Location location;
         switch (eventUpdateDto.getAccess()) {
             case ADMIN:
-                location = updateEventLocationAdmin(event,eventUpdateDto);
+                location = updateEventLocationAdmin(event, eventUpdateDto);
                 break;
             case PRIVATE:
-                location = updateEventLocationPrivate(event,eventUpdateDto);
+                location = updateEventLocationPrivate(event, eventUpdateDto);
                 break;
-            default: throw new ObjectNotFoundException("Unknown access");
+            default:
+                throw new ObjectNotFoundException("Unknown access");
         }
         event.setLocation(location);
 
     }
 
-    private Location updateEventLocationAdmin(Event event, EventUpdateDto eventUpdateDto){
+    private Location updateEventLocationAdmin(Event event, EventUpdateDto eventUpdateDto) {
 
-        if(eventUpdateDto.getLocation().getId()!=null &&
-                !eventUpdateDto.getLocation().getId().equals(event.getLocation().getId())){
+        if (eventUpdateDto.getLocation().getId() != null &&
+                !eventUpdateDto.getLocation().getId().equals(event.getLocation().getId())) {
             return switchLocation(eventUpdateDto.getLocation().getId());
         }
 
@@ -379,16 +378,16 @@ public class EventServiceImp implements EventService {
 
         Location eventLocation = event.getLocation();
         LocationInputDto locationInputDto = eventUpdateDto.getLocation();
-        if(locationInputDto.getLat()==null){
+        if (locationInputDto.getLat() == null) {
             locationInputDto.setLat(eventLocation.getLat());
         }
-        if(locationInputDto.getLon()==null){
+        if (locationInputDto.getLon() == null) {
             locationInputDto.setLon(eventLocation.getLon());
         }
-        if(locationInputDto.getPlace()==null){
+        if (locationInputDto.getPlace() == null) {
             locationInputDto.setPlace(eventLocation.getPlace());
         }
-        if(locationInputDto.getRadius()==null){
+        if (locationInputDto.getRadius() == null) {
             locationInputDto.setRadius(eventLocation.getRadius());
         }
         return locationService.addLocationAdmin(locationInputDto);
@@ -396,40 +395,40 @@ public class EventServiceImp implements EventService {
 
     }
 
-    private Location updateEventLocationPrivate(Event event, EventUpdateDto eventUpdateDto){
+    private Location updateEventLocationPrivate(Event event, EventUpdateDto eventUpdateDto) {
 
-        if(eventUpdateDto.getLocation().getId()!=null &&
-                !eventUpdateDto.getLocation().getId().equals(event.getLocation().getId())){
-            return switchLocation(event.getInitiator().getId(),eventUpdateDto.getLocation().getId());
+        if (eventUpdateDto.getLocation().getId() != null &&
+                !eventUpdateDto.getLocation().getId().equals(event.getLocation().getId())) {
+            return switchLocation(event.getInitiator().getId(), eventUpdateDto.getLocation().getId());
         }
 
         Long usages = eventRepository.countLocationUsages(event.getLocation().getId(), event.getId()).getCountId();
         boolean isCreator = event.getLocation().getAccess().equals(Access.PRIVATE) &&
                 event.getLocation().getCreator().getId().equals(eventUpdateDto.getUserId());
-        if(isCreator && usages == 0) {
+        if (isCreator && usages == 0) {
             eventUpdateDto.getLocation().setId(event.getLocation().getId());
             return locationService.updateLocation(eventUpdateDto.getLocation());
         }
 
         Location eventLocation = event.getLocation();
         LocationInputDto locationInputDto = eventUpdateDto.getLocation();
-        if(locationInputDto.getLat()==null){
+        if (locationInputDto.getLat() == null) {
             locationInputDto.setLat(eventLocation.getLat());
         }
-        if(locationInputDto.getLon()==null){
+        if (locationInputDto.getLon() == null) {
             locationInputDto.setLon(eventLocation.getLon());
         }
-        if(locationInputDto.getPlace()==null){
+        if (locationInputDto.getPlace() == null) {
             locationInputDto.setPlace(eventLocation.getPlace());
         }
-        if(locationInputDto.getRadius()==null){
+        if (locationInputDto.getRadius() == null) {
             locationInputDto.setRadius(eventLocation.getRadius());
         }
-        return locationService.addLocationPrivate(eventUpdateDto.getLocation(),event.getInitiator());
+        return locationService.addLocationPrivate(eventUpdateDto.getLocation(), event.getInitiator());
     }
 
     public Location switchLocation(Long locationId) {
-        return switchLocation(-1L,locationId);
+        return switchLocation(-1L, locationId);
     }
 
 
@@ -437,13 +436,12 @@ public class EventServiceImp implements EventService {
         Location location = locationRepository.findById(locationId).orElseThrow(
                 () -> new ObjectNotFoundException("Location not found")
         );
-        if(eventRepository.countStateLocationUsages(locationId, State.PUBLISHED.toString(),
-                userId).getCountId()==0 && location.getAccess().equals(Access.PRIVATE)){
+        if (eventRepository.countStateLocationUsages(locationId, State.PUBLISHED.toString(),
+                userId).getCountId() == 0 && location.getAccess().equals(Access.PRIVATE)) {
             throw new ObjectNotFoundException("Location not found");
         }
         return location;
     }
-
 
 
     private void updateEventStateAdmin(Event event, State state) {
@@ -457,7 +455,8 @@ public class EventServiceImp implements EventService {
             case REJECT_EVENT:
                 event.setState(State.CANCELED);
                 break;
-            default: throw new ObjectNotFoundException("Unknown action");
+            default:
+                throw new ObjectNotFoundException("Unknown action");
         }
     }
 
@@ -469,7 +468,8 @@ public class EventServiceImp implements EventService {
             case CANCEL_REVIEW:
                 event.setState(State.CANCELED);
                 break;
-            default: throw new ObjectNotFoundException("Unknown action");
+            default:
+                throw new ObjectNotFoundException("Unknown action");
         }
     }
 
@@ -486,8 +486,8 @@ public class EventServiceImp implements EventService {
             location = locationRepository.findById(eventInputDto.getLocation().getId()).orElseThrow(
                     () -> new ObjectNotFoundException("Location not found")
             );
-            if(eventRepository.countStateLocationUsages(eventInputDto.getLocation().getId(), State.PUBLISHED.toString(),
-                    initiator.getId()).getCountId()==0 && location.getAccess().equals(Access.PRIVATE)){
+            if (eventRepository.countStateLocationUsages(eventInputDto.getLocation().getId(), State.PUBLISHED.toString(),
+                    initiator.getId()).getCountId() == 0 && location.getAccess().equals(Access.PRIVATE)) {
                 throw new ObjectNotFoundException("Location not found");
             }
         } else {
