@@ -175,10 +175,10 @@ public class LocationServiceImp implements LocationService {
         if (creator == null) {
             throw new ObjectNotFoundException("User not found");
         }
-        if(locationInputDto.getRadius() == null){
+        if (locationInputDto.getRadius() == null) {
             locationInputDto.setRadius(10);
         }
-        if(locationInputDto.getPlace() == null){
+        if (locationInputDto.getPlace() == null) {
             locationInputDto.setPlace("Untitled place");
         }
         if (locationRepository.findAllByLatAndLonAndPlace(locationInputDto.getLat(),
