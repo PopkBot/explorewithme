@@ -108,9 +108,9 @@ public class EventServiceImp implements EventService {
         if (paramsDto.getLocationGetParamsDto() != null) {
             BooleanExpression locationQuery = locationQuery(paramsDto.getLocationGetParamsDto());
             if (!locationQuery.equals(QLocation.location.isNotNull())) {
-                JPQLQuery<Long> subQuery = JPAExpressions.select(QLocation.location.id).
-                        from(QLocation.location).
-                        where(locationQuery);
+                JPQLQuery<Long> subQuery = JPAExpressions.select(QLocation.location.id)
+                        .from(QLocation.location)
+                        .where(locationQuery);
                 query = query.and(QEvent.event.location.in(subQuery));
             }
         }
@@ -245,9 +245,9 @@ public class EventServiceImp implements EventService {
         if (paramsDto.getLocationGetParamsDto() != null) {
             BooleanExpression locationQuery = locationQuery(paramsDto.getLocationGetParamsDto());
             if (!locationQuery.equals(QLocation.location.isNotNull())) {
-                JPQLQuery<Long> subQuery = JPAExpressions.select(QLocation.location.id).
-                        from(QLocation.location).
-                        where(locationQuery);
+                JPQLQuery<Long> subQuery = JPAExpressions.select(QLocation.location.id)
+                        .from(QLocation.location)
+                        .where(locationQuery);
                 query = query.and(QEvent.event.location.in(subQuery));
             }
         }

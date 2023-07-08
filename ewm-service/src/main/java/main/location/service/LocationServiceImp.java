@@ -95,9 +95,9 @@ public class LocationServiceImp implements LocationService {
         dto.validate();
         BooleanExpression query = QLocation.location.isNotNull();
         if (!dto.getAccess().equals(Access.ADMIN)) {
-            JPQLQuery<Long> subQuery = JPAExpressions.select(QEvent.event.location).
-                    from(QEvent.event).
-                    where(QEvent.event.state.eq(State.PUBLISHED));
+            JPQLQuery<Long> subQuery = JPAExpressions.select(QEvent.event.location)
+                    .from(QEvent.event)
+                    .where(QEvent.event.state.eq(State.PUBLISHED));
             query = query.and(QLocation.location.id.in(subQuery));
         }
         if (dto.getLon() != null && dto.getLat() != null && dto.getRadius() != null) {
