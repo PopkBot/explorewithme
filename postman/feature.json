@@ -2933,12 +2933,12 @@
 											"\r",
 											"        pm.collectionVariables.set(\"response\", event1);\r",
 											"        pm.collectionVariables.set(\"locationResponse\", location1);\r",
-											"\r",
+											"        location2 = {id:location1.id };\r",
 											"\r",
 											"        pm.request.body.update({\r",
 											"            mode: 'raw',\r",
 											"            raw: JSON.stringify({\r",
-											"                location: {id:location1.id}\r",
+											"                location: location2\r",
 											"            }),\r",
 											"            options: { raw: { language: 'json' } }\r",
 											"        });\r",
@@ -3019,6 +3019,15 @@
 							"request": {
 								"method": "PATCH",
 								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{{request_body}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
 								"url": {
 									"raw": "{{serverUrl}}/admin/events/:eventId",
 									"host": [
@@ -3111,6 +3120,15 @@
 							"request": {
 								"method": "PATCH",
 								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{{request_body}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
 								"url": {
 									"raw": "{{serverUrl}}/users/:userId/events/:eventId",
 									"host": [
@@ -3249,6 +3267,15 @@
 							"request": {
 								"method": "PATCH",
 								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{{request_body}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
 								"url": {
 									"raw": "{{serverUrl}}/users/:userId/events/:eventId",
 									"host": [
@@ -5392,7 +5419,6 @@
 		{
 			"key": "locationResponse",
 			"value": ""
-
 		}
 	]
 }
