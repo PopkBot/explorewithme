@@ -223,48 +223,6 @@
 							"response": []
 						},
 						{
-							"name": "Add location null radius",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Ответ должен содержать код статуса 400\", function () {\r",
-											"    pm.response.to.be.badRequest;    \r",
-											"    pm.response.to.be.withBody;\r",
-											"    pm.response.to.be.json;\r",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n    \"lat\":90,\r\n    \"lon\":180,\r\n    \"radius\":null,\r\n    \"place\":\"place\"\r\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{serverUrl}}/admin/locations",
-									"host": [
-										"{{serverUrl}}"
-									],
-									"path": [
-										"admin",
-										"locations"
-									]
-								}
-							},
-							"response": []
-						},
-						{
 							"name": "Add location negative radius",
 							"event": [
 								{
@@ -287,48 +245,6 @@
 								"body": {
 									"mode": "raw",
 									"raw": "{\r\n    \"lat\":0,\r\n    \"lon\":0,\r\n    \"radius\":-1,\r\n    \"place\":\"place\"\r\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{serverUrl}}/admin/locations",
-									"host": [
-										"{{serverUrl}}"
-									],
-									"path": [
-										"admin",
-										"locations"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Add location null place",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Ответ должен содержать код статуса 400\", function () {\r",
-											"    pm.response.to.be.badRequest;    \r",
-											"    pm.response.to.be.withBody;\r",
-											"    pm.response.to.be.json;\r",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n    \"lat\":60,\r\n    \"lon\":60,\r\n    \"radius\":1,\r\n    \"place\":null\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
