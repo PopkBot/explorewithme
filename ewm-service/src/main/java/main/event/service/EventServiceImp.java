@@ -84,6 +84,12 @@ public class EventServiceImp implements EventService {
         return eventMapper.convertToDto(event);
     }
 
+    /**
+     * Получение списка событий по фильтрам: инициаторы, категории, состоянию публикации, временному интервалу,
+     * параметрам локации: координаты и радиус поиска, название страны, города или локации.
+     * @param paramsDto параметры поиска
+     * @return список DTO событий, удовлетворяющих фильтрам
+     */
     @Override
     public List<EventDto> getEvents(GetEventsParamsDto paramsDto) {
         paramsDto.validate();
@@ -215,6 +221,13 @@ public class EventServiceImp implements EventService {
         return eventMapper.convertToDto(event);
     }
 
+    /**
+     * Получение списка событий по фильтрам: текст запроса в аннотации или описании, категории, платно или бесплатно,
+     * временному интервалу, доступные, параметрам локации: координаты и радиус поиска, название страны, города или локации.
+     * Передаются только опубликованные события.
+     * @param paramsDto параметры поиска
+     * @return список DTO событий, удовлетворяющих фильтрам
+     */
     @Override
     public List<EventPublicDto> getEventsPublic(GetEventsParamsDto paramsDto, HitInputDto hitDto) {
         paramsDto.validate();
@@ -363,6 +376,14 @@ public class EventServiceImp implements EventService {
 
     }
 
+    /**
+     * Обновляет локацию события. Если передан идентификатор другой локации, в событии заменится локация на существующую.
+     * Если локация уже используется, то создастся новая локация и запишется в событие.
+     * Если локация не используется другими событиями, параметры текущей локации изменятся.
+     * @param event событие, локация которого обновляется
+     * @param eventUpdateDto параметры обновления
+     * @return объект обновленной локации
+     */
     private Location updateEventLocationAdmin(Event event, EventUpdateDto eventUpdateDto) {
 
         if (eventUpdateDto.getLocation().getId() != null &&
@@ -395,6 +416,14 @@ public class EventServiceImp implements EventService {
 
     }
 
+    /**
+     * Обновляет локацию события. Если передан идентификатор другой локации, в событии заменится локация на существующую.
+     * Если пользователь не создатель локации или локация уже используется, то создастся новая локация и запишется в событие.
+     * Если пользователь является создателем локации и локация не используется другими событиями, параметры текущей локации изменятся.
+     * @param event событие, локация которого обновляется
+     * @param eventUpdateDto параметры обновления
+     * @return объект обновленной локации
+     */
     private Location updateEventLocationPrivate(Event event, EventUpdateDto eventUpdateDto) {
 
         if (eventUpdateDto.getLocation().getId() != null &&
@@ -432,6 +461,13 @@ public class EventServiceImp implements EventService {
     }
 
 
+    /**
+     * Возвращает объект локации при смене лоции по идентификатору
+     * @param userId
+     * @param locationId
+     * @return объект найденной локации
+     * @throws ObjectNotFoundException локация не найдена по идентификатору, или недоступна для пользователя
+     */
     public Location switchLocation(Long userId, Long locationId) {
         Location location = locationRepository.findById(locationId).orElseThrow(
                 () -> new ObjectNotFoundException("Location not found")
@@ -473,6 +509,15 @@ public class EventServiceImp implements EventService {
         }
     }
 
+    /**
+     * Создание события по параметрам. Локация события может быть задана параметрами или по идентификатору существующей
+     * локации. При добавлении локации по идентификатору доступны только опубликованные локации и локации администратора,
+     * для пользователя доступны также все его локации.
+     * @param eventInputDto параметры для создания события
+     * @param initiator пользователь, инициирующий событие
+     * @param category категория события
+     * @return объект события
+     */
     private Event makeEvent(EventInputDto eventInputDto, User initiator, Category category) {
         Event event = eventMapper.convertToEvent(eventInputDto);
         event.setConfirmedRequests(0);
@@ -483,13 +528,7 @@ public class EventServiceImp implements EventService {
         event.setCategory(category);
         Location location;
         if (eventInputDto.getLocation().getId() != null) {
-            location = locationRepository.findById(eventInputDto.getLocation().getId()).orElseThrow(
-                    () -> new ObjectNotFoundException("Location not found")
-            );
-            if (eventRepository.countStateLocationUsages(eventInputDto.getLocation().getId(), State.PUBLISHED.toString(),
-                    initiator.getId()).getCountId() == 0 && location.getAccess().equals(Access.PRIVATE)) {
-                throw new ObjectNotFoundException("Location not found");
-            }
+            location = switchLocation(eventInputDto.getLocation().getId());
         } else {
             location = locationService.addLocationPrivate(eventInputDto.getLocation(), initiator);
         }

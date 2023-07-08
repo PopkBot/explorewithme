@@ -42,11 +42,24 @@ public class LocationServiceImp implements LocationService {
     private final LocationClient locationClient;
     private final EventRepository eventRepository;
 
+    /**
+     * Добавление локации из контроллера
+     * @param locationInputDto
+     * @return DTO созданной локации
+     */
     @Override
     public LocationDto addLocationFromController(LocationInputDto locationInputDto) {
         return locationMapper.convertToDto(addLocationAdmin(locationInputDto));
     }
 
+    /**
+     * Обновление локации из контроллера
+     * @param locationInputDto
+     * @return DTO обновленной локации
+     * @throws ObjectNotFoundException в БД не обнаружена локация
+     * @throws  ConflictException локация используется в других событиях и недоступна для изменения
+     * @throws ObjectAlreadyExistsException локация с такими же параметрами уже существует
+     */
     @Override
     public LocationDto updateLocationFromController(LocationInputDto locationInputDto) {
 
@@ -67,6 +80,13 @@ public class LocationServiceImp implements LocationService {
         return locationMapper.convertToDto(location);
     }
 
+    /**
+     * Удаление локации
+     * @param id идентификатор удаляемой локации
+     * @return DTO удаленной локации
+     * @throws ObjectNotFoundException в БД не обнаружена локация
+     * @throws  ConflictException локация используется в других событиях и недоступна для изменения
+     */
     @Override
     public LocationDto deleteLocationById(Long id) {
         Location location = locationRepository.findById(id).orElseThrow(
@@ -81,6 +101,10 @@ public class LocationServiceImp implements LocationService {
         return locationMapper.convertToDto(location);
     }
 
+    /**
+     * Удаление неиспользуемых локаций (локации, которые не используются в событиях)
+     * @return список DTO удаленных локаций
+     */
     @Override
     public List<LocationDto> deleteUnusedLocations() {
         List<Location> unusedLocations = locationRepository.getUnusedLocations();
@@ -89,6 +113,12 @@ public class LocationServiceImp implements LocationService {
         return unusedLocations.stream().map(locationMapper::convertToDto).collect(Collectors.toList());
     }
 
+    /**
+     * Получение списка локаций по фильтрам, для публичных запросов выдаются только локации, добавленные администратором
+     * или локации в опубликованных событиях
+     * @param dto фильтры поиска: координаты локации и радиус поиска, название города или страны, название места локации
+     * @return список DTO локаций, удовлетворяющих фильтрам
+     */
     @Override
     public List<LocationDto> getLocations(LocationGetParamsDto dto) {
 
@@ -135,6 +165,12 @@ public class LocationServiceImp implements LocationService {
         return locationDtos;
     }
 
+    /**
+     * Получение локации по ее идентификатору
+     * @param id идентификатор локации
+     * @return DTO найденной локации
+     * @throws ObjectNotFoundException по идентификатору не нашлось локации в БД
+     */
     @Override
     public LocationDto getLocationById(Long id) {
         Location location = locationRepository.findById(id).orElseThrow(
@@ -144,6 +180,13 @@ public class LocationServiceImp implements LocationService {
         return locationMapper.convertToDto(location);
     }
 
+    /**
+     * Получение локации по ее идентификатору по публичному запросу
+     * @param id идентификатор локации
+     * @return DTO найденной локации
+     * @throws ObjectNotFoundException по идентификатору не нашлось локации в БД или локация относится к неопубликованному
+     * событию
+     */
     @Override
     public LocationDto getLocationByIdPublic(Long id) {
         Location location = locationRepository.findById(id).orElseThrow(
@@ -157,6 +200,12 @@ public class LocationServiceImp implements LocationService {
         return locationMapper.convertToDto(location);
     }
 
+    /**
+     * Создать локацию от лица администратора
+     * @param locationInputDto параметры создаваемой локации
+     * @return объект созданной локации
+     * @throws ObjectAlreadyExistsException локация с такими же параметрами уже существует в БД
+     */
     @Override
     @Transactional
     public Location addLocationAdmin(LocationInputDto locationInputDto) {
@@ -169,6 +218,14 @@ public class LocationServiceImp implements LocationService {
         return location;
     }
 
+    /**
+     * Создание локации от лица пользователя
+     * @param locationInputDto параметры создаваемой локации
+     * @param creator пользователь, создающих локацию
+     * @return объект созданной локации
+     * @throws ObjectAlreadyExistsException локация с такими же параметрами уже существует в БД
+     * @throws ObjectNotFoundException пользователь не передан
+     */
     @Override
     @Transactional
     public Location addLocationPrivate(LocationInputDto locationInputDto, User creator) {
@@ -192,6 +249,14 @@ public class LocationServiceImp implements LocationService {
         return location;
     }
 
+
+    /**
+     * Обновление локации
+     * @param locationInputDto параметры обновления локации
+     * @return объект обновленной локации
+     * @throws ObjectNotFoundException локация не нашлась в БД
+     * @throws ObjectAlreadyExistsException локация с такими же параметрами уже существует в БД
+     */
     @Override
     @Transactional
     public Location updateLocation(LocationInputDto locationInputDto) {
@@ -212,7 +277,7 @@ public class LocationServiceImp implements LocationService {
     private Location makeLocation(LocationInputDto inputDto, Access access) {
         Location location = locationMapper.convertToModel(inputDto);
         location.setAccess(access);
-        setCityAndCountry(location, inputDto);
+        setCityAndCountry(location);
         return location;
     }
 
@@ -233,13 +298,17 @@ public class LocationServiceImp implements LocationService {
             location.setRadius(inputDto.getRadius());
         }
         if (isDifferentCoords) {
-            setCityAndCountry(location, inputDto);
+            setCityAndCountry(location);
         }
     }
 
-    private void setCityAndCountry(Location location, LocationInputDto inputDto) {
+    /**
+     * Записывает в локацию город и страну по координатам
+     * @param location
+     */
+    private void setCityAndCountry(Location location) {
         LocationDto clientDto = new LocationDto();
-        ResponseEntity<Object> response = locationClient.getCountryAndCityByCoords(inputDto.getLon(), inputDto.getLat());
+        ResponseEntity<Object> response = locationClient.getCountryAndCityByCoords(location.getLon(), location.getLat());
         if (response.getStatusCode().equals(HttpStatus.OK) && response.getBody() != null) {
             clientDto = locationMapper.convertResponseEntityToDto(response);
         }
@@ -254,8 +323,5 @@ public class LocationServiceImp implements LocationService {
         } else {
             location.setCountry(clientDto.getCountry());
         }
-
     }
-
-
 }

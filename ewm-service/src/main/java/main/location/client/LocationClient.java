@@ -11,6 +11,9 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import java.util.Map;
 
+/**
+ * Клиент для отправки запроса на внешний сервер для получения названия страны и города по координатам.
+ */
 @Component
 public class LocationClient extends BaseClient {
 
