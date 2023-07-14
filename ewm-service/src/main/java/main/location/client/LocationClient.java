@@ -27,9 +27,9 @@ public class LocationClient {
         headers.setAcceptLanguage(Locale.LanguageRange.parse("en"));
         this.baseClient = new BaseClientAdapter(
                 builder
-                .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl))
-                .requestFactory(HttpComponentsClientHttpRequestFactory::new)
-                .build(),
+                        .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl))
+                        .requestFactory(HttpComponentsClientHttpRequestFactory::new)
+                        .build(),
                 headers
         );
     }

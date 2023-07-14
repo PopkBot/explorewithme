@@ -44,6 +44,7 @@ public class LocationServiceImp implements LocationService {
 
     /**
      * Добавление локации из контроллера
+     *
      * @param locationInputDto
      * @return DTO созданной локации
      */
@@ -54,10 +55,11 @@ public class LocationServiceImp implements LocationService {
 
     /**
      * Обновление локации из контроллера
+     *
      * @param locationInputDto
      * @return DTO обновленной локации
-     * @throws ObjectNotFoundException в БД не обнаружена локация
-     * @throws  ConflictException локация используется в других событиях и недоступна для изменения
+     * @throws ObjectNotFoundException      в БД не обнаружена локация
+     * @throws ConflictException            локация используется в других событиях и недоступна для изменения
      * @throws ObjectAlreadyExistsException локация с такими же параметрами уже существует
      */
     @Override
@@ -82,10 +84,11 @@ public class LocationServiceImp implements LocationService {
 
     /**
      * Удаление локации
+     *
      * @param id идентификатор удаляемой локации
      * @return DTO удаленной локации
      * @throws ObjectNotFoundException в БД не обнаружена локация
-     * @throws  ConflictException локация используется в других событиях и недоступна для изменения
+     * @throws ConflictException       локация используется в других событиях и недоступна для изменения
      */
     @Override
     public LocationDto deleteLocationById(Long id) {
@@ -103,6 +106,7 @@ public class LocationServiceImp implements LocationService {
 
     /**
      * Удаление неиспользуемых локаций (локации, которые не используются в событиях)
+     *
      * @return список DTO удаленных локаций
      */
     @Override
@@ -116,6 +120,7 @@ public class LocationServiceImp implements LocationService {
     /**
      * Получение списка локаций по фильтрам, для публичных запросов выдаются только локации, добавленные администратором
      * или локации в опубликованных событиях
+     *
      * @param dto фильтры поиска: координаты локации и радиус поиска, название города или страны, название места локации
      * @return список DTO локаций, удовлетворяющих фильтрам
      */
@@ -167,6 +172,7 @@ public class LocationServiceImp implements LocationService {
 
     /**
      * Получение локации по ее идентификатору
+     *
      * @param id идентификатор локации
      * @return DTO найденной локации
      * @throws ObjectNotFoundException по идентификатору не нашлось локации в БД
@@ -182,10 +188,11 @@ public class LocationServiceImp implements LocationService {
 
     /**
      * Получение локации по ее идентификатору по публичному запросу
+     *
      * @param id идентификатор локации
      * @return DTO найденной локации
      * @throws ObjectNotFoundException по идентификатору не нашлось локации в БД или локация относится к неопубликованному
-     * событию
+     *                                 событию
      */
     @Override
     public LocationDto getLocationByIdPublic(Long id) {
@@ -202,6 +209,7 @@ public class LocationServiceImp implements LocationService {
 
     /**
      * Создать локацию от лица администратора
+     *
      * @param locationInputDto параметры создаваемой локации
      * @return объект созданной локации
      * @throws ObjectAlreadyExistsException локация с такими же параметрами уже существует в БД
@@ -220,11 +228,12 @@ public class LocationServiceImp implements LocationService {
 
     /**
      * Создание локации от лица пользователя
+     *
      * @param locationInputDto параметры создаваемой локации
-     * @param creator пользователь, создающих локацию
+     * @param creator          пользователь, создающих локацию
      * @return объект созданной локации
      * @throws ObjectAlreadyExistsException локация с такими же параметрами уже существует в БД
-     * @throws ObjectNotFoundException пользователь не передан
+     * @throws ObjectNotFoundException      пользователь не передан
      */
     @Override
     @Transactional
@@ -252,9 +261,10 @@ public class LocationServiceImp implements LocationService {
 
     /**
      * Обновление локации
+     *
      * @param locationInputDto параметры обновления локации
      * @return объект обновленной локации
-     * @throws ObjectNotFoundException локация не нашлась в БД
+     * @throws ObjectNotFoundException      локация не нашлась в БД
      * @throws ObjectAlreadyExistsException локация с такими же параметрами уже существует в БД
      */
     @Override
@@ -304,6 +314,7 @@ public class LocationServiceImp implements LocationService {
 
     /**
      * Записывает в локацию город и страну по координатам
+     *
      * @param location
      */
     private void setCityAndCountry(Location location) {

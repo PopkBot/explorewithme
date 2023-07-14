@@ -1,12 +1,13 @@
 package client;
 
-import org.apache.http.client.methods.HttpHead;
 import org.springframework.http.*;
 import org.springframework.lang.Nullable;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class BaseClient {
     protected final RestTemplate rest;
@@ -19,7 +20,7 @@ public class BaseClient {
         this.additionalHeaders = additionalHeaders;
     }
 
-    public BaseClient(RestTemplate rest ) {
+    public BaseClient(RestTemplate rest) {
         this.rest = rest;
     }
 
@@ -102,8 +103,8 @@ public class BaseClient {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
-        if(additionalHeaders!=null){
-            for(String key: additionalHeaders.keySet()){
+        if (additionalHeaders != null) {
+            for (String key : additionalHeaders.keySet()) {
                 headers.addAll(key, Objects.requireNonNull(additionalHeaders.get(key)));
             }
         }

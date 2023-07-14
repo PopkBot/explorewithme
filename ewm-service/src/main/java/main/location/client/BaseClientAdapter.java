@@ -19,7 +19,7 @@ public class BaseClientAdapter extends BaseClient {
     }
 
     @Override
-    public ResponseEntity<Object> get(String path, Map<String, Object> params){
-        return super.get(path,params);
+    public ResponseEntity<Object> get(String path, Map<String, Object> params) {
+        return super.get(path, params);
     }
 }
