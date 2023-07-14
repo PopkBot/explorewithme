@@ -54,7 +54,7 @@ public class Event {
     private String title;
     @Column(name = "views", nullable = false)
     private Integer views;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "location_id")
     private Location location;
     @EqualsAndHashCode.Exclude

@@ -1,18 +1,25 @@
 package client;
 
+import org.apache.http.client.methods.HttpHead;
 import org.springframework.http.*;
 import org.springframework.lang.Nullable;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 public class BaseClient {
     protected final RestTemplate rest;
 
-    public BaseClient(RestTemplate rest) {
+    private HttpHeaders additionalHeaders;
+
+    public BaseClient(RestTemplate rest, HttpHeaders additionalHeaders) {
+
+        this.rest = rest;
+        this.additionalHeaders = additionalHeaders;
+    }
+
+    public BaseClient(RestTemplate rest ) {
         this.rest = rest;
     }
 
@@ -78,24 +85,28 @@ public class BaseClient {
             Object> parameters, @Nullable T body) {
         HttpEntity<T> requestEntity = new HttpEntity<>(body, defaultHeaders());
 
-        ResponseEntity<Object> shareitServerResponse;
+        ResponseEntity<Object> serverResponse;
         try {
             if (parameters != null) {
-                shareitServerResponse = rest.exchange(path, method, requestEntity, Object.class, parameters);
+                serverResponse = rest.exchange(path, method, requestEntity, Object.class, parameters);
             } else {
-                shareitServerResponse = rest.exchange(path, method, requestEntity, Object.class);
+                serverResponse = rest.exchange(path, method, requestEntity, Object.class);
             }
         } catch (HttpStatusCodeException e) {
             return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsByteArray());
         }
-        return prepareGatewayResponse(shareitServerResponse);
+        return prepareGatewayResponse(serverResponse);
     }
 
     private HttpHeaders defaultHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
-        headers.setAcceptLanguage(Locale.LanguageRange.parse("en"));
+        if(additionalHeaders!=null){
+            for(String key: additionalHeaders.keySet()){
+                headers.addAll(key, Objects.requireNonNull(additionalHeaders.get(key)));
+            }
+        }
         return headers;
     }
 }
