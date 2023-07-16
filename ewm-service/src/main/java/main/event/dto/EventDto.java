@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import main.category.dto.CategoryDto;
-import main.event.model.Location;
+import main.location.dto.LocationDto;
 import main.user.dto.UserDto;
 
 import java.time.ZonedDateTime;
@@ -35,5 +35,5 @@ public class EventDto {
     private String state;
     private String title;
     private Integer views;
-    private Location location;
+    private LocationDto location;
 }

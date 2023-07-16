@@ -7,9 +7,18 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class BaseClient {
     protected final RestTemplate rest;
+
+    private HttpHeaders additionalHeaders;
+
+    public BaseClient(RestTemplate rest, HttpHeaders additionalHeaders) {
+
+        this.rest = rest;
+        this.additionalHeaders = additionalHeaders;
+    }
 
     public BaseClient(RestTemplate rest) {
         this.rest = rest;
@@ -73,26 +82,32 @@ public class BaseClient {
         return makeAndSendRequest(HttpMethod.DELETE, path, parameters, null);
     }
 
-    private <T> ResponseEntity<Object> makeAndSendRequest(HttpMethod method, String path, @Nullable Map<String, Object> parameters, @Nullable T body) {
+    private <T> ResponseEntity<Object> makeAndSendRequest(HttpMethod method, String path, @Nullable Map<String,
+            Object> parameters, @Nullable T body) {
         HttpEntity<T> requestEntity = new HttpEntity<>(body, defaultHeaders());
 
-        ResponseEntity<Object> shareitServerResponse;
+        ResponseEntity<Object> serverResponse;
         try {
             if (parameters != null) {
-                shareitServerResponse = rest.exchange(path, method, requestEntity, Object.class, parameters);
+                serverResponse = rest.exchange(path, method, requestEntity, Object.class, parameters);
             } else {
-                shareitServerResponse = rest.exchange(path, method, requestEntity, Object.class);
+                serverResponse = rest.exchange(path, method, requestEntity, Object.class);
             }
         } catch (HttpStatusCodeException e) {
             return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsByteArray());
         }
-        return prepareGatewayResponse(shareitServerResponse);
+        return prepareGatewayResponse(serverResponse);
     }
 
     private HttpHeaders defaultHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        if (additionalHeaders != null) {
+            for (String key : additionalHeaders.keySet()) {
+                headers.addAll(key, Objects.requireNonNull(additionalHeaders.get(key)));
+            }
+        }
         return headers;
     }
 }

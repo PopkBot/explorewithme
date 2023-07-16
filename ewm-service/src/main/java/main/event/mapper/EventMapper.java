@@ -32,7 +32,7 @@ public class EventMapper {
         configuration.setMatchingStrategy(MatchingStrategies.STRICT);
     }
 
-    public Event convertToCategory(EventInputDto eventInputDto) {
+    public Event convertToEvent(EventInputDto eventInputDto) {
         Event event = modelMapper.map(eventInputDto, Event.class);
         event.setEventDate(LocalDateTime.parse(eventInputDto.getEventDate(),
                 FormatConstants.DATE_TIME_FORMATTER).atZone(ZoneId.systemDefault()));

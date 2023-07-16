@@ -14,6 +14,9 @@ import main.event.dto.EventDto;
 import main.event.dto.EventPublicDto;
 import main.event.dto.GetEventsParamsDto;
 import main.event.service.EventService;
+import main.location.dto.LocationDto;
+import main.location.dto.LocationGetParamsDto;
+import main.location.service.LocationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +35,7 @@ public class PublicUser {
     private final CategoryService categoryService;
     private final EventService eventService;
     private final CompilationService compilationService;
+    private final LocationService locationService;
 
     @GetMapping("/categories")
     @ResponseStatus(HttpStatus.OK)
@@ -59,6 +63,12 @@ public class PublicUser {
                                           @RequestParam(defaultValue = "VIEWS") String sort,
                                           @RequestParam(defaultValue = "0") Integer from,
                                           @RequestParam(defaultValue = "10") Integer size,
+                                          @RequestParam(required = false) Double lat,
+                                          @RequestParam(required = false) Double lon,
+                                          @RequestParam(required = false) Integer radius,
+                                          @RequestParam(required = false) String country,
+                                          @RequestParam(required = false) String city,
+                                          @RequestParam(required = false) String place,
                                           HttpServletRequest request) {
         GetEventsParamsDto dto = GetEventsParamsDto.builder()
                 .searchText(text)
@@ -70,6 +80,17 @@ public class PublicUser {
                 .sort(SortType.valueOf(sort))
                 .size(size)
                 .from(from)
+                .locationGetParamsDto(
+                        LocationGetParamsDto.builder()
+                                .lon(lon)
+                                .lat(lat)
+                                .country(country)
+                                .city(city)
+                                .place(place)
+                                .radius(radius)
+                                .access(Access.PUBLIC)
+                                .build()
+                )
                 .build();
         HitInputDto hitInputDto = HitInputDto.builder()
                 .ip(request.getRemoteAddr())
@@ -118,5 +139,37 @@ public class PublicUser {
         return compilationService.getCompilationById(compId);
     }
 
+    @GetMapping("/locations")
+    @ResponseStatus(HttpStatus.OK)
+    public List<LocationDto> getLocations(@RequestParam(required = false) Double lat,
+                                          @RequestParam(required = false) Double lon,
+                                          @RequestParam(required = false) Integer radius,
+                                          @RequestParam(required = false) String country,
+                                          @RequestParam(required = false) String city,
+                                          @RequestParam(required = false) String place,
+                                          @RequestParam(defaultValue = "0") Integer from,
+                                          @RequestParam(defaultValue = "10") Integer size
+    ) {
+        LocationGetParamsDto dto = LocationGetParamsDto.builder()
+                .lon(lon)
+                .lat(lat)
+                .country(country)
+                .city(city)
+                .place(place)
+                .radius(radius)
+                .from(from)
+                .size(size)
+                .access(Access.PUBLIC)
+                .build();
+        log.info("Request for locations");
+        return locationService.getLocations(dto);
+    }
+
+    @GetMapping("/locations/{locationId}")
+    @ResponseStatus(HttpStatus.OK)
+    public LocationDto getLocationById(@PathVariable Long locationId) {
+        log.info("Request for location {}", locationId);
+        return locationService.getLocationByIdPublic(locationId);
+    }
 
 }

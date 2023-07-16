@@ -1,12 +1,15 @@
 package main.event.service;
 
 import client.StatClient;
-import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.*;
+import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.JPQLQuery;
 import constants.FormatConstants;
 import dto.HitInputDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import main.CustomPageRequest;
+import main.access.Access;
 import main.category.model.Category;
 import main.category.repository.CategoryRepository;
 import main.event.State;
@@ -18,6 +21,12 @@ import main.event.repository.EventRepository;
 import main.exceptions.ConflictException;
 import main.exceptions.ObjectNotFoundException;
 import main.exceptions.ValidationException;
+import main.location.dto.LocationGetParamsDto;
+import main.location.dto.LocationInputDto;
+import main.location.model.Location;
+import main.location.model.QLocation;
+import main.location.repository.LocationRepository;
+import main.location.service.LocationService;
 import main.user.model.User;
 import main.user.repository.UserRepository;
 import org.springframework.data.domain.Page;
@@ -45,6 +54,8 @@ public class EventServiceImp implements EventService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final EventMapper eventMapper;
+    private final LocationService locationService;
+    private final LocationRepository locationRepository;
     private final StatClient statClient;
 
     @Override
@@ -67,11 +78,19 @@ public class EventServiceImp implements EventService {
                 .isBefore(ZonedDateTime.now(ZoneId.systemDefault()).plusHours(hoursBefore))) {
             throw new ValidationException("Cannot create event " + hoursBefore + " hours before start");
         }
+
         Event event = eventRepository.save(makeEvent(eventInputDto, user, category));
         log.info("Event has been created {}", event);
         return eventMapper.convertToDto(event);
     }
 
+    /**
+     * Получение списка событий по фильтрам: инициаторы, категории, состоянию публикации, временному интервалу,
+     * параметрам локации: координаты и радиус поиска, название страны, города или локации.
+     *
+     * @param paramsDto параметры поиска
+     * @return список DTO событий, удовлетворяющих фильтрам
+     */
     @Override
     public List<EventDto> getEvents(GetEventsParamsDto paramsDto) {
         paramsDto.validate();
@@ -93,6 +112,15 @@ public class EventServiceImp implements EventService {
                     .atZone(ZoneId.systemDefault());
             query = query.and(QEvent.event.eventDate.between(start, end));
         }
+        if (paramsDto.getLocationGetParamsDto() != null) {
+            BooleanExpression locationQuery = locationQuery(paramsDto.getLocationGetParamsDto());
+            if (!locationQuery.equals(QLocation.location.isNotNull())) {
+                JPQLQuery<Long> subQuery = JPAExpressions.select(QLocation.location.id)
+                        .from(QLocation.location)
+                        .where(locationQuery);
+                query = query.and(QEvent.event.location.in(subQuery));
+            }
+        }
 
         Pageable page = new CustomPageRequest(paramsDto.getFrom(), paramsDto.getSize());
         Page<Event> eventPage = eventRepository.findAll(query, page);
@@ -100,6 +128,41 @@ public class EventServiceImp implements EventService {
                 .map(eventMapper::convertToDto).collect(Collectors.toList());
         log.info("Page of events has been returned {}", eventDtos);
         return eventDtos;
+    }
+
+
+    private BooleanExpression locationQuery(LocationGetParamsDto dto) {
+
+        BooleanExpression query = QLocation.location.isNotNull();
+
+        if (dto.getLon() != null && dto.getLat() != null && dto.getRadius() != null) {
+            Double toRads = Math.PI / 180.0;
+            NumberPath<Double> latP = Expressions.numberPath(Double.class, String.valueOf(dto.getLat() * toRads));
+            NumberPath<Double> lonP = Expressions.numberPath(Double.class, String.valueOf(dto.getLon() * toRads));
+            NumberPath<Double> radP = Expressions.numberPath(Double.class, dto.getRadius().toString());
+            NumberPath<Double> earthRadius = Expressions.numberPath(Double.class, String.valueOf(6372795.0));
+
+            NumberExpression<Double> sin1Sin2 = MathExpressions.sin(latP)
+                    .multiply(MathExpressions.sin(QLocation.location.lat.multiply(toRads)));
+            NumberExpression<Double> cos1Cos2CosLon = MathExpressions.cos(latP)
+                    .multiply(MathExpressions.cos(QLocation.location.lat.multiply(toRads)))
+                    .multiply(MathExpressions.cos(
+                            lonP.subtract(QLocation.location.lon.multiply(toRads)).abs()
+                    ));
+            NumberExpression<Double> distance = MathExpressions.acos(sin1Sin2.add(cos1Cos2CosLon)).multiply(earthRadius);
+            query = query.and(QLocation.location.radius.add(radP).gt(distance));
+        }
+
+        if (dto.getCity() != null) {
+            query = query.and(QLocation.location.city.containsIgnoreCase(dto.getCity()));
+        }
+        if (dto.getCountry() != null) {
+            query = query.and(QLocation.location.country.containsIgnoreCase(dto.getCountry()));
+        }
+        if (dto.getPlace() != null) {
+            query = query.and(QLocation.location.place.containsIgnoreCase(dto.getPlace()));
+        }
+        return query;
     }
 
     @Override
@@ -116,11 +179,14 @@ public class EventServiceImp implements EventService {
             case PRIVATE:
                 updateEventPrivate(event, eventUpdateDto);
                 break;
+            default:
+                throw new ObjectNotFoundException("Unknown access");
         }
         event = eventRepository.save(event);
         log.info("Event has been updated {}", event);
         return eventMapper.convertToDto(event);
     }
+
 
     @Override
     public EventDto getEventById(Long userId, Long eventId) {
@@ -156,6 +222,14 @@ public class EventServiceImp implements EventService {
         return eventMapper.convertToDto(event);
     }
 
+    /**
+     * Получение списка событий по фильтрам: текст запроса в аннотации или описании, категории, платно или бесплатно,
+     * временному интервалу, доступные, параметрам локации: координаты и радиус поиска, название страны, города или локации.
+     * Передаются только опубликованные события.
+     *
+     * @param paramsDto параметры поиска
+     * @return список DTO событий, удовлетворяющих фильтрам
+     */
     @Override
     public List<EventPublicDto> getEventsPublic(GetEventsParamsDto paramsDto, HitInputDto hitDto) {
         paramsDto.validate();
@@ -182,6 +256,15 @@ public class EventServiceImp implements EventService {
         }
         if (paramsDto.getOnlyAvailable() != null && paramsDto.getOnlyAvailable()) {
             query = query.and(QEvent.event.participantLimit.gt(QEvent.event.confirmedRequests));
+        }
+        if (paramsDto.getLocationGetParamsDto() != null) {
+            BooleanExpression locationQuery = locationQuery(paramsDto.getLocationGetParamsDto());
+            if (!locationQuery.equals(QLocation.location.isNotNull())) {
+                JPQLQuery<Long> subQuery = JPAExpressions.select(QLocation.location.id)
+                        .from(QLocation.location)
+                        .where(locationQuery);
+                query = query.and(QEvent.event.location.in(subQuery));
+            }
         }
 
         Sort sort;
@@ -222,7 +305,7 @@ public class EventServiceImp implements EventService {
 
     private void updateEventPrivate(Event event, EventUpdateDto eventUpdateDto) {
         long hoursBefore = 2L;
-        userRepository.findById(eventUpdateDto.getUserId()).orElseThrow(
+        User user = userRepository.findById(eventUpdateDto.getUserId()).orElseThrow(
                 () -> new ObjectNotFoundException("User not found")
         );
         if (!event.getInitiator().getId().equals(eventUpdateDto.getUserId())) {
@@ -262,7 +345,7 @@ public class EventServiceImp implements EventService {
             event.setEventDate(date);
         }
         if (eventUpdateDto.getLocation() != null) {
-            event.setLocation(eventUpdateDto.getLocation());
+            updateEventLocation(event, eventUpdateDto);
         }
         if (eventUpdateDto.getPaid() != null) {
             event.setPaid(eventUpdateDto.getPaid());
@@ -278,6 +361,130 @@ public class EventServiceImp implements EventService {
         }
     }
 
+    private void updateEventLocation(Event event, EventUpdateDto eventUpdateDto) {
+
+        Location location;
+        switch (eventUpdateDto.getAccess()) {
+            case ADMIN:
+                location = updateEventLocationAdmin(event, eventUpdateDto);
+                break;
+            case PRIVATE:
+                location = updateEventLocationPrivate(event, eventUpdateDto);
+                break;
+            default:
+                throw new ObjectNotFoundException("Unknown access");
+        }
+        event.setLocation(location);
+
+    }
+
+    /**
+     * Обновляет локацию события. Если передан идентификатор другой локации, в событии заменится локация на существующую.
+     * Если локация уже используется, то создастся новая локация и запишется в событие.
+     * Если локация не используется другими событиями, параметры текущей локации изменятся.
+     *
+     * @param event          событие, локация которого обновляется
+     * @param eventUpdateDto параметры обновления
+     * @return объект обновленной локации
+     */
+    private Location updateEventLocationAdmin(Event event, EventUpdateDto eventUpdateDto) {
+
+        if (eventUpdateDto.getLocation().getId() != null &&
+                !eventUpdateDto.getLocation().getId().equals(event.getLocation().getId())) {
+            return switchLocation(eventUpdateDto.getLocation().getId());
+        }
+
+        Long usages = eventRepository.countLocationUsages(event.getLocation().getId(), event.getId()).getCountId();
+        if (usages == 0) {
+            eventUpdateDto.getLocation().setId(event.getLocation().getId());
+            return locationService.updateLocation(eventUpdateDto.getLocation());
+        }
+
+        Location eventLocation = event.getLocation();
+        LocationInputDto locationInputDto = eventUpdateDto.getLocation();
+        if (locationInputDto.getLat() == null) {
+            locationInputDto.setLat(eventLocation.getLat());
+        }
+        if (locationInputDto.getLon() == null) {
+            locationInputDto.setLon(eventLocation.getLon());
+        }
+        if (locationInputDto.getPlace() == null) {
+            locationInputDto.setPlace(eventLocation.getPlace());
+        }
+        if (locationInputDto.getRadius() == null) {
+            locationInputDto.setRadius(eventLocation.getRadius());
+        }
+        return locationService.addLocationAdmin(locationInputDto);
+
+
+    }
+
+    /**
+     * Обновляет локацию события. Если передан идентификатор другой локации, в событии заменится локация на существующую.
+     * Если пользователь не создатель локации или локация уже используется, то создастся новая локация и запишется в событие.
+     * Если пользователь является создателем локации и локация не используется другими событиями, параметры текущей локации изменятся.
+     *
+     * @param event          событие, локация которого обновляется
+     * @param eventUpdateDto параметры обновления
+     * @return объект обновленной локации
+     */
+    private Location updateEventLocationPrivate(Event event, EventUpdateDto eventUpdateDto) {
+
+        if (eventUpdateDto.getLocation().getId() != null &&
+                !eventUpdateDto.getLocation().getId().equals(event.getLocation().getId())) {
+            return switchLocation(event.getInitiator().getId(), eventUpdateDto.getLocation().getId());
+        }
+
+        Long usages = eventRepository.countLocationUsages(event.getLocation().getId(), event.getId()).getCountId();
+        boolean isCreator = event.getLocation().getAccess().equals(Access.PRIVATE) &&
+                event.getLocation().getCreator().getId().equals(eventUpdateDto.getUserId());
+        if (isCreator && usages == 0) {
+            eventUpdateDto.getLocation().setId(event.getLocation().getId());
+            return locationService.updateLocation(eventUpdateDto.getLocation());
+        }
+
+        Location eventLocation = event.getLocation();
+        LocationInputDto locationInputDto = eventUpdateDto.getLocation();
+        if (locationInputDto.getLat() == null) {
+            locationInputDto.setLat(eventLocation.getLat());
+        }
+        if (locationInputDto.getLon() == null) {
+            locationInputDto.setLon(eventLocation.getLon());
+        }
+        if (locationInputDto.getPlace() == null) {
+            locationInputDto.setPlace(eventLocation.getPlace());
+        }
+        if (locationInputDto.getRadius() == null) {
+            locationInputDto.setRadius(eventLocation.getRadius());
+        }
+        return locationService.addLocationPrivate(eventUpdateDto.getLocation(), event.getInitiator());
+    }
+
+    public Location switchLocation(Long locationId) {
+        return switchLocation(-1L, locationId);
+    }
+
+
+    /**
+     * Возвращает объект локации при смене лоции по идентификатору
+     *
+     * @param userId
+     * @param locationId
+     * @return объект найденной локации
+     * @throws ObjectNotFoundException локация не найдена по идентификатору, или недоступна для пользователя
+     */
+    public Location switchLocation(Long userId, Long locationId) {
+        Location location = locationRepository.findById(locationId).orElseThrow(
+                () -> new ObjectNotFoundException("Location not found")
+        );
+        if (eventRepository.countStateLocationUsages(locationId, State.PUBLISHED.toString(),
+                userId).getCountId() == 0 && location.getAccess().equals(Access.PRIVATE)) {
+            throw new ObjectNotFoundException("Location not found");
+        }
+        return location;
+    }
+
+
     private void updateEventStateAdmin(Event event, State state) {
         switch (state) {
             case PUBLISH_EVENT:
@@ -289,6 +496,8 @@ public class EventServiceImp implements EventService {
             case REJECT_EVENT:
                 event.setState(State.CANCELED);
                 break;
+            default:
+                throw new ObjectNotFoundException("Unknown action");
         }
     }
 
@@ -300,17 +509,38 @@ public class EventServiceImp implements EventService {
             case CANCEL_REVIEW:
                 event.setState(State.CANCELED);
                 break;
+            default:
+                throw new ObjectNotFoundException("Unknown action");
         }
     }
 
+    /**
+     * Создание события по параметрам. Локация события может быть задана параметрами или по идентификатору существующей
+     * локации. При добавлении локации по идентификатору доступны только опубликованные локации и локации администратора,
+     * для пользователя доступны также все его локации.
+     *
+     * @param eventInputDto параметры для создания события
+     * @param initiator     пользователь, инициирующий событие
+     * @param category      категория события
+     * @return объект события
+     */
     private Event makeEvent(EventInputDto eventInputDto, User initiator, Category category) {
-        Event event = eventMapper.convertToCategory(eventInputDto);
+        Event event = eventMapper.convertToEvent(eventInputDto);
         event.setConfirmedRequests(0);
         event.setCreatedOn(ZonedDateTime.now(ZoneId.systemDefault()));
         event.setInitiator(initiator);
         event.setState(State.PENDING);
         event.setViews(0);
         event.setCategory(category);
+        Location location;
+        if (eventInputDto.getLocation().getId() != null) {
+            location = switchLocation(eventInputDto.getLocation().getId());
+        } else {
+            location = locationService.addLocationPrivate(eventInputDto.getLocation(), initiator);
+        }
+        event.setLocation(location);
         return event;
     }
+
+
 }

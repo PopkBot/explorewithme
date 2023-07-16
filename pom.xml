@@ -30,11 +30,32 @@
 
 		<com.querydsl.verison>5.0.0</com.querydsl.verison>
 		<com.vladmihalcea.verison>2.2.2</com.vladmihalcea.verison>
+		<org.testcontainers.verison>1.17.6</org.testcontainers.verison>
 	</properties>
 
 
 	<dependencyManagement>
 		<dependencies>
+
+			<dependency>
+				<groupId>org.testcontainers</groupId>
+				<artifactId>testcontainers</artifactId>
+				<version>${org.testcontainers.verison}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.testcontainers</groupId>
+				<artifactId>junit-jupiter</artifactId>
+				<version>${org.testcontainers.verison}</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.testcontainers</groupId>
+				<artifactId>postgresql</artifactId>
+				<version>${org.testcontainers.verison}</version>
+				<scope>test</scope>
+			</dependency>
 
 
 			<dependency>
